@@ -9,6 +9,7 @@ def scrape_channel(channel_list):
     for video in videos:
         print(video['videoId'])
 
+
 def scrape_all_channels(channel_list):
     """Scrapes all videos and titles for each channel and appends them in channel_list"""
     #Writes the channel names in channel_list with an empy list as value
@@ -20,6 +21,7 @@ def scrape_all_channels(channel_list):
             video_id = video['videoId']
             title = video['title']['runs'][0]['text']
             channel_list[channel['name']].append({'video_id': video_id, 'title': title, 'seen': ""})
+
 
 def update_channel(channel_name, channel_list):
     """Scrapes the last 'n' videos from a channel and compares them to the already saved videos and then updates the main video dictionary"""
@@ -47,6 +49,7 @@ def update_channel(channel_name, channel_list):
             channel_list[channel_name].insert(0, video)
             count += 1
     print(f"{channel_name}\t - {count} new video(s) found.")
+
 
 def update_all_channels(channel_list):
     for channel in channel_list:
