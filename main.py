@@ -1,8 +1,7 @@
 import json
 import os
-import os
-from functions import add_channel, return_id_title_seen, set_channel_seen, print_id_title_seen
-from scrapevideos import scrape_channel, scrape_all_channels ,update_channel
+from functions import add_channel, return_id_title_seen, set_channel_seen, print_id_title_seen, remove_channel
+from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, update_all_channels
 
 CHANNELS = dict()
 CHANNEL_JSON = "test.json"
@@ -23,10 +22,16 @@ def write_json():
 #add_channel("NileBlue", "https://www.youtube.com/c/NileRed2/", CHANNELS)
 #add_channel("V for Valentine", "https://www.youtube.com/c/VforValentine/", CHANNELS)
 #scrape_all_channels(CHANNELS)
-        
-temp_videos = update_channel("NileBlue", CHANNELS)
-print(CHANNELS['NileBlue'])
-print(len(CHANNELS['NileBlue']))
+remove_channel("V for Valentine", CHANNELS)        
+print(CHANNELS)
+#update_all_channels(CHANNELS)
+#for channel in CHANNELS:
+#    if channel == "channels":
+#        continue
+#    update_channel(channel, CHANNELS)
+#update_channel("NileBlue", CHANNELS)
+#print(CHANNELS['NileBlue'])
+#print(len(CHANNELS['NileBlue']))
 #print(CHANNELS['NileBlue'][0])
 
 

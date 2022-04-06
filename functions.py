@@ -1,12 +1,21 @@
 import json
 from prettytable import PrettyTable
 
-def add_channel(name, url, location):
+def add_channel(name, url, channel_list):
     """Adds a channel and url to location"""
 #    name = input("Channel name: ")
 #    url = input("Channel url: ")
-    location['channels'].append({'name': name, 'url': url})
+    channel_list['channels'].append({'name': name, 'url': url})
     return True 
+
+def remove_channel(name, channel_list): 
+    """Removes a channel in 'channels:' and all of it'v videos"""
+    if input(f"are you sure you want to delete, {name} and all it's video's? 'y/n'") == "y":
+        for index, channel in enumerate(channel_list['channels']):
+            if name == channel['name']:
+                channel_list['channels'].pop(index)
+                channel_list.pop(name)
+
 
 def return_id_title_seen(channel_name, channel_list):
     """Returns title and videoid for a given channel"""
