@@ -2,6 +2,10 @@ import json
 import re
 from prettytable import PrettyTable
 
+def write_json(channel_list, json_location):
+    with open (json_location, 'w') as f:
+        json.dump(channel_list, f, indent=2)
+
 def add_channel(channel_list):
     """Adds a channel and url to channel_list"""
     re_http = re.compile("^https?://www.youtube.com/c/.*/$")

@@ -1,6 +1,6 @@
 import json
 import os
-from functions import add_channel, return_id_title_seen, set_channel_seen, print_id_title_seen, remove_channel
+from functions import add_channel, return_id_title_seen, set_channel_seen, print_id_title_seen, remove_channel, write_json
 from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, update_all_channels
 
 CHANNELS = dict()
@@ -14,9 +14,9 @@ if not os.path.isfile(CHANNEL_JSON):
 with open(CHANNEL_JSON, 'r') as f:
     CHANNELS = json.load(f)
 
-def write_json():
-    with open (CHANNEL_JSON, 'w') as f:
-        json.dump(CHANNELS, f, indent=2)
+#def write_json(channel_list, json_location):
+#    with open (CHANNEL_JSON, 'w') as f:
+#        json.dump(CHANNELS, f, indent=2)
 
 
 #add_channel(CHANNELS)
@@ -33,13 +33,13 @@ def write_json():
 #print(len(CHANNELS['NileBlue']))
 #print(CHANNELS['NileBlue'][0])
 
-#scrape_all_channels(CHANNELS)
-scrape_channel("V for Valentine", CHANNELS)
+scrape_all_channels(CHANNELS)
+#scrape_channel("V for Valentine", CHANNELS)
 print(CHANNELS)
 #print(CHANNELS['V for Valentine'])
 #set_channel_seen("NileBlue", CHANNELS, True)
 #print_id_title_seen("NileBlue", CHANNELS)
-#write_json()
+write_json(CHANNELS, CHANNEL_JSON)
 
 
 #print(CHANNELS)
