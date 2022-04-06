@@ -20,8 +20,6 @@ def write_json():
 
 
 #add_channel(CHANNELS)
-#add_channel(CHANNELS)
-#add_channel("V for Valentine", "https://www.youtube.com/c/VforValentine/", CHANNELS)
 #scrape_all_channels(CHANNELS)
 #remove_channel("V for Valentine", CHANNELS)        
 #print(CHANNELS)
@@ -35,10 +33,13 @@ def write_json():
 #print(len(CHANNELS['NileBlue']))
 #print(CHANNELS['NileBlue'][0])
 
-
+#scrape_all_channels(CHANNELS)
+scrape_channel("V for Valentine", CHANNELS)
+print(CHANNELS)
+#print(CHANNELS['V for Valentine'])
 #set_channel_seen("NileBlue", CHANNELS, True)
-print_id_title_seen("NileBlue", CHANNELS)
-write_json()
+#print_id_title_seen("NileBlue", CHANNELS)
+#write_json()
 
 
 #print(CHANNELS)
