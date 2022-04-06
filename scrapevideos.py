@@ -1,26 +1,36 @@
 import scrapetube
 
-def scrape_channel(channel_list):
-    for channel in channel_list['channels']:
-        print(channel['name'], channel['url'])
+def scrape_channel(channel_name, channel_list):
+    #Gets index from the given channel
+    for name in channel_list['channels']:
+        if name['name'] == channel_name:
+            url = name['url']
+            break
 
-    answer = input("\nWhat channel url to scrape?: ")
-    videos = scrapetube.get_channel(channel_url=answer)
+    channel_list[channel_name] = []
+    videos = scrapetube.get_channel(channel_url=url)
     for video in videos:
-        print(video['videoId'])
+        video_id = video['videoId']
+        title = video['title']['runs'][0]['text']
+        channel_list[channel_name].append({'video_id': video_id, 'title': title, 'seen': ""})
+
 
 
 def scrape_all_channels(channel_list):
-    """Scrapes all videos and titles for each channel and appends them in channel_list"""
-    #Writes the channel names in channel_list with an empy list as value
     for channel in channel_list['channels']:
-            channel_list[channel['name']] = []
-    for channel in channel_list['channels']:
-        videos = scrapetube.get_channel(channel_url=channel['url'])
-        for video in videos:
-            video_id = video['videoId']
-            title = video['title']['runs'][0]['text']
-            channel_list[channel['name']].append({'video_id': video_id, 'title': title, 'seen': ""})
+        channel_name = channel['name']
+        scrape_channel(channel_name, channel_list)
+#        scrape_channel(channel, channel_list)
+#    """Scrapes all videos and titles for each channel and appends them in channel_list"""
+#    #Writes the channel names in channel_list with an empy list as value
+#    for channel in channel_list['channels']:
+#            channel_list[channel['name']] = []
+#    for channel in channel_list['channels']:
+#        videos = scrapetube.get_channel(channel_url=channel['url'])
+#        for video in videos:
+#            video_id = video['videoId']
+#            title = video['title']['runs'][0]['text']
+#            channel_list[channel['name']].append({'video_id': video_id, 'title': title, 'seen': ""})
 
 
 def update_channel(channel_name, channel_list):
