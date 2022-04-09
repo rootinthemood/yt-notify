@@ -12,7 +12,7 @@ def scrape_channel(channel_name, channel_list):
     for video in videos:
         video_id = video['videoId']
         title = video['title']['runs'][0]['text']
-        channel_list[channel_name].append({'video_id': video_id, 'title': title, 'seen': ""})
+        channel_list[channel_name].append({'video_id': video_id, 'title': title, 'seen': False})
 
 
 
