@@ -1,13 +1,8 @@
 import tkinter
 import os
-from functools import partial
+from functions import write_json
+import webbrowser
 
-
-root = tkinter.Tk()
-root.title("yt-notify")
-root.minsize(width=900, height=900)
-root.config(padx=20, pady=20)
-root.tk.call('tk', 'scaling', 1.0)
 
 def video_window(channel_list, channel_name, json_location):
     """Makes a window for a given channel and lists all videotitles with a checkbutton, """
@@ -139,33 +134,3 @@ def video_window(channel_list, channel_name, json_location):
 
 
     window_name.mainloop()
-
-def donothing():
-   x = 0
-   
-
-menubar = tkinter.Menu(root)
-filemenu = tkinter.Menu(menubar, tearoff=0)
-filemenu.add_command(label="New", command=donothing)
-filemenu.add_command(label="Open", command=donothing)
-filemenu.add_command(label="Save", command=donothing)
-filemenu.add_separator()
-filemenu.add_command(label="Exit", command=root.quit)
-menubar.add_cascade(label="File", menu=filemenu)
-
-#    helpmenu = tkinter.Menu(menubar, tearoff=0)
-#    helpmenu.add_command(label="Help Index", command=donothing)
-#    helpmenu.add_command(label="About...", command=donothing)
-#    menubar.add_cascade(label="Help", menu=helpmenu)
-
-root.config(menu=menubar)
-
-for channel in CHANNELS:
-    if channel == "channels":
-        continue
-    open_channel = partial(video_window, CHANNELS, channel, CHANNEL_JSON)
-    tkinter.Button(text=channel, command=open_channel).pack()
-
-
-
-root.mainloop()
