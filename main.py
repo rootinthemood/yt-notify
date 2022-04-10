@@ -26,12 +26,10 @@ with open(CHANNEL_JSON, 'r') as f:
 #root.minsize(width=600, height=600)
 #root.config(padx=20, pady=20)
 
-for channel in CHANNELS:
-    if channel == "channels":
-        continue
-    all_videos_window(CHANNELS, channel, CHANNEL_JSON)
-#all_videos_window(CHANNELS, "V for Valentine")
-#all_videos_window(CHANNELS, "NileBlue", "test2")
+#for channel in CHANNELS:
+#    if channel == "channels":
+#        continue
+all_videos_window(CHANNELS, "V for Valentine", CHANNEL_JSON)
 #def save():
 #    for key, value in var_list.items():
 #        for index, video in enumerate(CHANNELS['NileBlue']):
