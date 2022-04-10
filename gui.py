@@ -9,8 +9,8 @@ def all_videos_window(channel_list, channel_name, json_location):
     window_name = channel_name + "_window"
     window_name = tkinter.Tk()
     window_name.title(channel_name)
-    window_name.minsize(width=770, height=900)
-    window_name.maxsize(width=770, height=900)
+    window_name.minsize(width=780, height=900)
+    window_name.maxsize(width=780, height=900)
     window_name.config(padx=20, pady=20)
     window_name.tk.call('tk', 'scaling', 1.0)
 
@@ -46,28 +46,31 @@ def all_videos_window(channel_list, channel_name, json_location):
     scroll_y = tkinter.Scrollbar(window_name, orient='vertical', command=canvas.yview)
     frame = tkinter.Frame(canvas)
 
+    label_channel_name = tkinter.Label(window_name, text=channel_name, font=('Ariel', 20, 'bold'))
+    label_channel_name.pack(side='top')
+
     frame_title_seen = tkinter.Frame(window_name)
-    frame_title_seen.pack()
+    frame_title_seen.pack(side='top')
 
     #Make Title and Seen labels
-    label_title = tkinter.Label(frame_title_seen, text="Title", font=('Ariel', 20, 'bold'))
-    label_title.grid(column=0, row=0, sticky="W")
+    label_title = tkinter.Label(frame_title_seen, text="Title", font=('Ariel', 12, 'bold'))
+    label_title.grid(column=0, row=0, pady=5)
 
-    label_blanc = tkinter.Label(frame_title_seen, text="           \t\t\t\t       ")
-    label_blanc.grid(column=1, row=0)
+    label_title = tkinter.Label(frame_title_seen, text="\t\t\t\t\t\t", font=('Ariel', 12, 'bold'))
+    label_title.grid(column=1, row=0, pady=5)
 
-    label_seen = tkinter.Label(frame_title_seen, text="Seen", font=('Ariel', 20, 'bold'))
-    label_seen.grid(column=2, row=0, sticky="E")
+    label_seen = tkinter.Label(frame_title_seen, text="Seen", font=('Ariel', 12, 'bold'))
+    label_seen.grid(column=2, row=0, pady=5)
 
     #Make Save and Print buttons
-    button_save = tkinter.Button(text="Save", command=save)
-    button_save.pack(anchor="center")
+    button_save = tkinter.Button(text="SAVE", font=('Ariel', 12, 'bold'), fg='green', command=save)
+    button_save.pack(side='bottom', anchor='w')
 
-    button_uncheck = tkinter.Button(text="check all", command=check_all)
-    button_uncheck.pack(anchor="e")
+    button_check = tkinter.Button(text="check all", command=check_all, width=10)
+    button_check.pack(side='bottom', anchor='e')
 
-    button_check = tkinter.Button(text="uncheck all", command=uncheck_all)
-    button_check.pack(anchor="e")
+    button_uncheck = tkinter.Button(text="uncheck all", command=uncheck_all)
+    button_uncheck.pack(side='bottom', anchor='e')
 
     #Make Label for title and checkbox for seen for every video
     label_channels=[]
@@ -82,7 +85,7 @@ def all_videos_window(channel_list, channel_name, json_location):
 
         #Make label for each title
         label = tkinter.Label(frame, text=title, cursor='hand2', font=('Ariel', 12))
-        label_channels.append(label)
+#        label_channels.append(label)
         link = "https://www.youtube.com/watch?v=" + channel['video_id'] 
         #Make binds for each label and put on grid
         label.bind("<ButtonRelease-1>", lambda e, link=link: webbrowser.open_new_tab(link))
@@ -108,12 +111,12 @@ def all_videos_window(channel_list, channel_name, json_location):
 #        label.bind('<Enter>', on_enter)
 #        binds.append(label_url)
     #Creates a canvas in a frame so a scrollbar can be added
-    canvas.create_window(0, 0, anchor='nw', window=frame)
+    canvas.create_window(0, 0, anchor='s', window=frame)
     canvas.update_idletasks()
     canvas.configure(scrollregion=canvas.bbox('all'),
                      yscrollcommand=scroll_y.set)
 
-    canvas.pack(fill='both', expand=True, side='left')
+    canvas.pack(anchor='n', fill='both', expand=True, side='left')
     scroll_y.pack(fill='y', side='right')
 
 
