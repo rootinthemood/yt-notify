@@ -28,7 +28,7 @@ init_database()
 
 root = tkinter.Tk()
 root.title("yt-notify")
-root.minsize(width=931, height=172)
+root.minsize(width=150, height=172)
 root.config(padx=20, pady=20)
 root.tk.call('tk', 'scaling', 1.0)
 
@@ -172,9 +172,12 @@ def get_max_button_length():
         if channel == "channels":
             continue
         chan_list.append(channel['name'])
-    max_string = max(chan_list, key=len)
-    max_len = len(max_string)
-    button_width = max_len + 4
+        if len(chan_list) >= 1:
+            max_string = max(chan_list, key=len)
+            max_len = len(max_string)
+            button_width = max_len
+        else:
+            button_width = 5
     return button_width
 
 #Makes buttons for each channel name
@@ -194,10 +197,11 @@ def draw_channel_names():
             column_int = 0
         tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
         column_int +=1
+    root.geometry("")
 
 #Removes all widgets in root placed with pack, then make them again.
 def redraw_channel_names():
-    list = root.pack_slaves()
+    list = root.grid_slaves()
     for l in list:
         l.destroy()
     #Makes them again
@@ -222,6 +226,13 @@ def add_channel_window():
                 return
 
         CHANNELS['channels'].append({'name': name, 'url': url})
+        CHANNELS[name] = []
+        input = messagebox.askquestion(title="Scrape",
+                               message=f"""Do you want to scrape the channel now?
+                                       This may take a while depending on the uploaded video's""",
+                               parent=add_channel_window)
+        if input == 'yes':
+            scrape_channel(name, CHANNELS)
         write_json(CHANNELS, CHANNEL_JSON)
         init_database()
         redraw_channel_names()
@@ -267,6 +278,48 @@ def add_channel_window():
     add_channel_window.mainloop()
 
 
+def delete_channel_window():
+    def delete_channel():
+        name = entry_channel.get()
+        for index, channel in enumerate(CHANNELS['channels']):
+            if name == channel['name']:
+                input = messagebox.askquestion(title="Delete channel",
+                                       message=f"are you sure you want to delete, {name} and all it's video's?",
+                                       parent=delete_channel_window)
+                if input == 'yes':
+                    CHANNELS['channels'].pop(index)
+                    CHANNELS.pop(name)
+                    write_json(CHANNELS, CHANNEL_JSON)
+                    init_database()
+                    redraw_channel_names()
+                    delete_channel_window.destroy()
+                    return
+        messagebox.showerror(title="Error", 
+                             message="Channel not found",
+                             parent=delete_channel_window)
+
+
+    delete_channel_window = tkinter.Tk()
+    delete_channel_window.title("Add Channel")
+    delete_channel_window.config(padx=20, pady=20)
+
+
+    label_channel = tkinter.Label(delete_channel_window, text="Channel Name: ")
+    label_channel.grid(column=0, row=0)
+
+    entry_channel = tkinter.Entry(delete_channel_window, width=30)
+    entry_channel.grid(column=1, row=0)
+
+    button_add = tkinter.Button(delete_channel_window, text="Delete",command = delete_channel)
+    button_add.grid(column=0, row=3)
+
+    button_cancel = tkinter.Button(delete_channel_window, text="Cancel", command=delete_channel_window.destroy)
+    button_cancel.grid(column=1, row=3)
+
+
+    delete_channel_window.mainloop()
+
+
 def donothing():
    x = 0
    
@@ -274,7 +327,7 @@ def donothing():
 menubar = tkinter.Menu(root)
 filemenu = tkinter.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Add channel", command=add_channel_window)
-filemenu.add_command(label="Delete channel", command=donothing)
+filemenu.add_command(label="Delete channel", command=delete_channel_window)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="Menu", menu=filemenu)
