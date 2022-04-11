@@ -1,9 +1,13 @@
 import json
 import os
 import tkinter
-from functions import add_channel, return_id_title_seen, set_channel_seen, print_id_title_seen, remove_channel, write_json
+from tkinter import messagebox
+from tkinter import ttk
+from functions import return_id_title_seen, set_channel_seen, print_id_title_seen, remove_channel, write_json
 from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, update_all_channels
 from functools import partial
+import webbrowser
+import re
 
 CHANNELS = dict()
 CHANNEL_JSON = "test.json"
@@ -13,8 +17,12 @@ if not os.path.isfile(CHANNEL_JSON):
         to_write = {'channels': []}
         json.dump(to_write, f)
 
-with open(CHANNEL_JSON, 'r') as f:
-    CHANNELS = json.load(f)
+def init_database():
+    global CHANNELS
+    with open(CHANNEL_JSON, 'r') as f:
+        CHANNELS = json.load(f)
+
+init_database()
 ###############################3############################3############################3
 
 root = tkinter.Tk()
@@ -65,7 +73,7 @@ def video_window(channel_name):
         window_name.destroy()
 
     canvas = tkinter.Canvas(window_name)
-    scroll_y = tkinter.Scrollbar(window_name, orient='vertical', command=canvas.yview)
+    scroll_y = ttk.Scrollbar(window_name, orient='vertical', command=canvas.yview)
     frame = tkinter.Frame(canvas)
 
     label_channel_name = tkinter.Label(window_name, text=channel_name, font=('Ariel', 20, 'bold'))
@@ -115,6 +123,7 @@ def video_window(channel_name):
     var_list={}
     binds=[]
 
+
     for index, channel in enumerate(CHANNELS[channel_name]):
         #Make title shorter if too long
         title = channel['title']
@@ -147,25 +156,102 @@ def video_window(channel_name):
     canvas.configure(scrollregion=canvas.bbox('all'),
                      yscrollcommand=scroll_y.set)
 
-    canvas.pack(anchor='n', fill='both', expand=True, side='left')
+    canvas.pack(anchor='nw', fill='both', expand=True, side='left')
     scroll_y.pack(fill='y', side='right')
 
 
 
     window_name.mainloop()
 
+def draw_channel_names():
+    for channel in CHANNELS['channels']:
+        if channel == "channels":
+            continue
+        name = channel['name']
+        open_channel = partial(video_window,name)
+        tkinter.Button(text=name, command=open_channel).pack()
+
+def redraw_channel_names():
+    list = root.pack_slaves()
+    for l in list:
+        l.destroy()
+
+    draw_channel_names()
+
+
+    
+def add_channel_window():
+
+    def add_channel():
+        name = entry_channel.get()
+        url = entry_url.get()
+        for channel in CHANNELS['channels']:
+            if not url_check(url):
+                messagebox.showerror("Error", "Incorrect URL format", parent=add_channel_window)
+                return
+            elif name == channel['name']:
+                messagebox.showerror("Error", f"{name} already in database", parent=add_channel_window)
+                return
+            elif url == channel['url']:
+                messagebox.showerror("Error", "URL already in database", parent=add_channel_window)
+                return
+        CHANNELS['channels'].append({'name': name, 'url': url})
+        write_json(CHANNELS, CHANNEL_JSON)
+        init_database()
+        redraw_channel_names()
+        add_channel_window.destroy()
+
+
+    def url_check(url):
+        re_http = re.compile("^https?://www.youtube.com/c/.*/$")
+        if re.search(re_http, url) is None:
+            return False
+#            button_add.config(state='disabled')
+        else:
+            return True
+#            button_add.config(state='normal')
+
+
+
+    add_channel_window = tkinter.Tk()
+    add_channel_window.title("Add Channel")
+    add_channel_window.config(padx=20, pady=20)
+
+    label_channel = tkinter.Label(add_channel_window, text="Channel Name: ")
+    label_channel.grid(column=0, row=0)
+
+    label_url = tkinter.Label(add_channel_window, text="Youtube URL: ")
+    label_url.grid(column=0, row=1)
+
+    entry_channel = tkinter.Entry(add_channel_window, width=30)
+    entry_channel.grid(column=1, row=0)
+
+    entry_url = tkinter.Entry(add_channel_window, width=30)
+    entry_url.grid(column=1, row=1)
+ #   c=add_channel_window.register(url_check)
+ #   entry_url.configure(validate="key", validatecommand=(c))
+
+    button_add = tkinter.Button(add_channel_window, text="Add",command = add_channel)
+    button_add.grid(column=0, row=3)
+
+    button_cancel = tkinter.Button(add_channel_window, text="Cancel", command=add_channel_window.destroy)
+    button_cancel.grid(column=1, row=3)
+
+
+    add_channel_window.mainloop()
+
+
 def donothing():
    x = 0
    
-
+#Add menubar at top
 menubar = tkinter.Menu(root)
 filemenu = tkinter.Menu(menubar, tearoff=0)
-filemenu.add_command(label="New", command=donothing)
-filemenu.add_command(label="Open", command=donothing)
-filemenu.add_command(label="Save", command=donothing)
+filemenu.add_command(label="Add channel", command=add_channel_window)
+filemenu.add_command(label="Delete channel", command=donothing)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
-menubar.add_cascade(label="File", menu=filemenu)
+menubar.add_cascade(label="Menu", menu=filemenu)
 
 #    helpmenu = tkinter.Menu(menubar, tearoff=0)
 #    helpmenu.add_command(label="Help Index", command=donothing)
@@ -174,13 +260,8 @@ menubar.add_cascade(label="File", menu=filemenu)
 
 root.config(menu=menubar)
 
-for channel in CHANNELS:
-    if channel == "channels":
-        continue
-    open_channel = partial(video_window,channel)
-    tkinter.Button(text=channel, command=open_channel).pack()
 
-
+draw_channel_names()
 
 root.mainloop()
 
