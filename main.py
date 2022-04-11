@@ -12,6 +12,7 @@ import re
 CHANNELS = dict()
 CHANNEL_JSON = "test.json"
 
+
 if not os.path.isfile(CHANNEL_JSON):
     with open(CHANNEL_JSON, 'w') as f:
         to_write = {'channels': []}
@@ -27,9 +28,10 @@ init_database()
 
 root = tkinter.Tk()
 root.title("yt-notify")
-root.minsize(width=900, height=900)
+root.minsize(width=931, height=172)
 root.config(padx=20, pady=20)
 root.tk.call('tk', 'scaling', 1.0)
+
 
 def video_window(channel_name):
     """Makes a window for a given channel and lists all videotitles with a checkbutton, """
@@ -151,7 +153,7 @@ def video_window(channel_name):
         tkinter.Checkbutton(frame, variable=var_list[channel['video_id']]).grid(column=1, row=index+1)
 
     #Creates a canvas in a frame so a scrollbar can be added
-    canvas.create_window(0, 0, anchor='s', window=frame)
+    canvas.create_window(0, 0, anchor='nw', window=frame)
     canvas.update_idletasks()
     canvas.configure(scrollregion=canvas.bbox('all'),
                      yscrollcommand=scroll_y.set)
@@ -163,23 +165,46 @@ def video_window(channel_name):
 
     window_name.mainloop()
 
-def draw_channel_names():
+#Get the length of the longest string from channels
+def get_max_button_length():
+    chan_list = list()
     for channel in CHANNELS['channels']:
         if channel == "channels":
             continue
+        chan_list.append(channel['name'])
+    max_string = max(chan_list, key=len)
+    max_len = len(max_string)
+    button_width = max_len + 4
+    return button_width
+
+#Makes buttons for each channel name
+def draw_channel_names():
+    column_int = 0
+    row_int = 0
+    button_width = get_max_button_length()
+    for channel in CHANNELS['channels']:
+        if channel == "channels":
+            continue
+
         name = channel['name']
         open_channel = partial(video_window,name)
-        tkinter.Button(text=name, command=open_channel).pack()
+#        tkinter.Button(text=name, command=open_channel).pack()
+        if column_int == 3:
+            row_int += 1
+            column_int = 0
+        tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
+        column_int +=1
 
+#Removes all widgets in root placed with pack, then make them again.
 def redraw_channel_names():
     list = root.pack_slaves()
     for l in list:
         l.destroy()
-
+    #Makes them again
     draw_channel_names()
 
 
-    
+#Make window "Add channel" 
 def add_channel_window():
 
     def add_channel():
@@ -195,6 +220,7 @@ def add_channel_window():
             elif url == channel['url']:
                 messagebox.showerror("Error", "URL already in database", parent=add_channel_window)
                 return
+
         CHANNELS['channels'].append({'name': name, 'url': url})
         write_json(CHANNELS, CHANNEL_JSON)
         init_database()
@@ -260,9 +286,17 @@ menubar.add_cascade(label="Menu", menu=filemenu)
 
 root.config(menu=menubar)
 
-
+#def window_size():
+#    root.update()
+#    screen_width = root.winfo_width()
+#    screen_height = root.winfo_height()
+#
+#    print("Screen width:", screen_width)
+#    print("Screen height:", screen_height)
+#window_size()
 draw_channel_names()
 
+#window_size()
 root.mainloop()
 
 #videos_window(CHANNELS, "V for Valentine", CHANNEL_JSON)
