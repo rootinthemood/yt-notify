@@ -145,10 +145,10 @@ def add_channel_window():
     label_url = tkinter.Label(add_channel_window, text="Youtube URL: ")
     label_url.grid(column=0, row=1)
 
-    entry_channel = tkinter.Entry(add_channel_window, width=30)
+    entry_channel = tkinter.Entry(add_channel_window, width=38)
     entry_channel.grid(column=1, row=0)
 
-    entry_url = tkinter.Entry(add_channel_window, width=30)
+    entry_url = tkinter.Entry(add_channel_window, width=38)
     entry_url.grid(column=1, row=1)
     entry_url.insert(tkinter.END, string="https://www.youtube.com/c/ChannelName/")
 
@@ -346,12 +346,28 @@ def update_channel_window(name):
         write_json(CHANNELS, CHANNEL_JSON)
         redraw_channel_names()
         messagebox.showinfo(title="Updates", message=updates, parent=root)
+
+def update_all_channels_window():
+    input = messagebox.askquestion(title="Update all channels",
+                       message=f"""Do you want to update all channels?
+                               This may take a while depending on the uploaded video's""",
+                       parent=root)
+    if input == 'yes':
+        updates = update_all_channels(CHANNELS)
+        string = ""
+        for update in updates:
+            string += update + "\n"
+        write_json(CHANNELS, CHANNEL_JSON)
+        redraw_channel_names()
+        messagebox.showinfo(title="Updates", message=string, parent=root)
    
 #Add menubar at top
 menubar = tkinter.Menu(root)
 filemenu = tkinter.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Add channel", command=add_channel_window)
 filemenu.add_command(label="Delete channel", command=delete_channel_window)
+filemenu.add_separator()
+filemenu.add_command(label="Update all channels", command=update_all_channels_window)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="Menu", menu=filemenu)
