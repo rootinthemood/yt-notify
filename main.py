@@ -53,6 +53,7 @@ def video_window(channel_name):
                         CHANNELS[channel_name][index]['seen'] = False
 
         write_json(CHANNELS, CHANNEL_JSON)
+        redraw_channel_names()
 
     #Functions to check/unceck checkboxes
     def check_all():
@@ -72,6 +73,7 @@ def video_window(channel_name):
 
     #Close window function
     def close():
+        redraw_channel_names()
         window_name.destroy()
 
     canvas = tkinter.Canvas(window_name)
@@ -180,6 +182,18 @@ def get_max_button_length():
             button_width = 5
     return button_width
 
+def check_unseen(channel_name):
+    for channel in CHANNELS[channel_name]:
+        if channel['seen'] == False:
+            return True
+    return False
+
+
+
+
+
+print(check_unseen("NileBlue"))
+
 #Makes buttons for each channel name
 def draw_channel_names():
     column_int = 0
@@ -188,13 +202,15 @@ def draw_channel_names():
     for channel in CHANNELS['channels']:
         if channel == "channels":
             continue
-
+        
         name = channel['name']
         open_channel = partial(video_window,name)
 #        tkinter.Button(text=name, command=open_channel).pack()
         if column_int == 3:
             row_int += 1
             column_int = 0
+        if check_unseen(name):
+            name += "*"
         tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
         column_int +=1
     root.geometry("")
@@ -265,8 +281,7 @@ def add_channel_window():
 
     entry_url = tkinter.Entry(add_channel_window, width=30)
     entry_url.grid(column=1, row=1)
- #   c=add_channel_window.register(url_check)
- #   entry_url.configure(validate="key", validatecommand=(c))
+    entry_url.insert(tkinter.END, string="https://www.youtube.com/c/ChannelName/")
 
     button_add = tkinter.Button(add_channel_window, text="Add",command = add_channel)
     button_add.grid(column=0, row=3)
