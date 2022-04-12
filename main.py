@@ -30,7 +30,7 @@ root = tkinter.Tk()
 root.title("yt-notify")
 root.minsize(width=150, height=172)
 root.config(padx=20, pady=20)
-root.tk.call('tk', 'scaling', 1.0)
+#root.tk.call('tk', 'scaling', 1.0)
 
 
 
@@ -73,6 +73,7 @@ def draw_channel_names():
             column_int = 0
         check_vid = partial(video_window, name)
         update = partial(update_channel_window, name)
+        delete = partial(delete_channel, name)
         if check_unseen(name):
             name += "*"
 #        tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
@@ -82,6 +83,8 @@ def draw_channel_names():
         menub["menu"] = menub.menu
         menub.menu.add_command(label="Video's", command=check_vid)
         menub.menu.add_command(label="Check for new video's", command=update)
+        menub.menu.add_separator()
+        menub.menu.add_command(label="Remove channel", command=delete)
         column_int +=1
     root.geometry("")
 
@@ -161,46 +164,23 @@ def add_channel_window():
 
     add_channel_window.mainloop()
 
-def delete_channel_window():
-    def delete_channel():
-        name = entry_channel.get()
-        for index, channel in enumerate(CHANNELS['channels']):
-            if name == channel['name']:
-                input = messagebox.askquestion(title="Delete channel",
-                                       message=f"are you sure you want to delete, {name} and all it's video's?",
-                                       parent=delete_channel_window)
-                if input == 'yes':
-                    CHANNELS['channels'].pop(index)
-                    CHANNELS.pop(name)
-                    write_json(CHANNELS, CHANNEL_JSON)
-                    init_database()
-                    redraw_channel_names()
-                    delete_channel_window.destroy()
-                    return
-        messagebox.showerror(title="Error", 
-                             message="Channel not found",
-                             parent=delete_channel_window)
-
-
-    delete_channel_window = tkinter.Tk()
-    delete_channel_window.title("Add Channel")
-    delete_channel_window.config(padx=20, pady=20)
-
-
-    label_channel = tkinter.Label(delete_channel_window, text="Channel Name: ")
-    label_channel.grid(column=0, row=0)
-
-    entry_channel = tkinter.Entry(delete_channel_window, width=30)
-    entry_channel.grid(column=1, row=0)
-
-    button_add = tkinter.Button(delete_channel_window, text="Delete",command = delete_channel)
-    button_add.grid(column=0, row=3)
-
-    button_cancel = tkinter.Button(delete_channel_window, text="Cancel", command=delete_channel_window.destroy)
-    button_cancel.grid(column=1, row=3)
-
-
-    delete_channel_window.mainloop()
+def delete_channel(name):
+    for index, channel in enumerate(CHANNELS['channels']):
+        if name == channel['name']:
+            input = messagebox.askquestion(title="Delete channel",
+                                   message=f"are you sure you want to delete, {name} and all it's video's?",
+                                   parent=root)
+            if input == 'yes':
+                CHANNELS['channels'].pop(index)
+                CHANNELS.pop(name)
+                write_json(CHANNELS, CHANNEL_JSON)
+                init_database()
+                redraw_channel_names()
+                return
+            return
+    messagebox.showerror(title="Error", 
+                         message="Channel not found",
+                         parent=root)
 
 def video_window(channel_name):
     """Makes a window for a given channel and lists all videotitles with a checkbutton, """
@@ -209,7 +189,7 @@ def video_window(channel_name):
     window_name.minsize(width=780, height=900)
     window_name.maxsize(width=780, height=900)
     window_name.config(padx=20, pady=20)
-    window_name.tk.call('tk', 'scaling', 1.0)
+#    window_name.tk.call('tk', 'scaling', 1.0)
 
     def save():
         """Saves the values from all checkboxes to CHANNELS and writes them to JSON_LOCATION"""
@@ -365,7 +345,7 @@ def update_all_channels_window():
 menubar = tkinter.Menu(root)
 filemenu = tkinter.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Add channel", command=add_channel_window)
-filemenu.add_command(label="Delete channel", command=delete_channel_window)
+#filemenu.add_command(label="Delete channel", command=delete_channel_window)
 filemenu.add_separator()
 filemenu.add_command(label="Update all channels", command=update_all_channels_window)
 filemenu.add_separator()
