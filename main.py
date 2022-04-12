@@ -33,6 +33,175 @@ root.config(padx=20, pady=20)
 root.tk.call('tk', 'scaling', 1.0)
 
 
+
+#Get the length of the longest string from channels
+def get_max_button_length():
+    chan_list = list()
+    for channel in CHANNELS['channels']:
+        if channel == "channels":
+            continue
+        chan_list.append(channel['name'])
+        if len(chan_list) >= 1:
+            max_string = max(chan_list, key=len)
+            max_len = len(max_string)
+            button_width = max_len
+        else:
+            button_width = 5
+    return button_width
+
+#Checks if channel has unseen videos
+def check_unseen(channel_name):
+    for channel in CHANNELS[channel_name]:
+        if channel['seen'] == False:
+            return True
+    return False
+
+#Makes buttons for each channel name
+def draw_channel_names():
+    column_int = 0
+    row_int = 0
+    button_width = get_max_button_length()
+    for channel in CHANNELS['channels']:
+        if channel == "channels":
+            continue
+        
+        name = channel['name']
+        open_channel = partial(video_window,name)
+#        tkinter.Button(text=name, command=open_channel).pack()
+        if column_int == 3:
+            row_int += 1
+            column_int = 0
+        check_vid = partial(video_window, name)
+        update = partial(update_channel_window, name)
+        if check_unseen(name):
+            name += "*"
+#        tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
+        menub = tkinter.Menubutton(root, text=name,width=button_width, relief='groove')
+        menub.grid(column=column_int, row=row_int)
+        menub.menu = tkinter.Menu(menub, tearoff=0)
+        menub["menu"] = menub.menu
+        menub.menu.add_command(label="Video's", command=check_vid)
+        menub.menu.add_command(label="Check for new video's", command=update)
+        column_int +=1
+    root.geometry("")
+
+#Removes all widgets in root placed with pack, then make them again.
+def redraw_channel_names():
+    list = root.grid_slaves()
+    for l in list:
+        l.destroy()
+    #Makes them again
+    draw_channel_names()
+
+#Make window "Add channel" 
+def add_channel_window(): 
+
+    def add_channel():
+        name = entry_channel.get()
+        url = entry_url.get()
+        for channel in CHANNELS['channels']:
+            if not url_check(url):
+                messagebox.showerror("Error", "Incorrect URL format", parent=add_channel_window)
+                return
+            elif name == channel['name']:
+                messagebox.showerror("Error", f"{name} already in database", parent=add_channel_window)
+                return
+            elif url == channel['url']:
+                messagebox.showerror("Error", "URL already in database", parent=add_channel_window)
+                return
+
+        CHANNELS['channels'].append({'name': name, 'url': url})
+        CHANNELS[name] = []
+        input = messagebox.askquestion(title="Scrape",
+                               message=f"""Do you want to scrape the channel now?
+                                       This may take a while depending on the uploaded video's""",
+                               parent=add_channel_window)
+        if input == 'yes':
+            scrape_channel(name, CHANNELS)
+        write_json(CHANNELS, CHANNEL_JSON)
+        init_database()
+        redraw_channel_names()
+        add_channel_window.destroy()
+
+
+    def url_check(url):
+        re_http = re.compile("^https?://www.youtube.com/c/.*/$")
+        if re.search(re_http, url) is None:
+            return False
+#            button_add.config(state='disabled')
+        else:
+            return True
+#            button_add.config(state='normal')
+
+
+
+    add_channel_window = tkinter.Tk()
+    add_channel_window.title("Add Channel")
+    add_channel_window.config(padx=20, pady=20)
+
+    label_channel = tkinter.Label(add_channel_window, text="Channel Name: ")
+    label_channel.grid(column=0, row=0)
+
+    label_url = tkinter.Label(add_channel_window, text="Youtube URL: ")
+    label_url.grid(column=0, row=1)
+
+    entry_channel = tkinter.Entry(add_channel_window, width=30)
+    entry_channel.grid(column=1, row=0)
+
+    entry_url = tkinter.Entry(add_channel_window, width=30)
+    entry_url.grid(column=1, row=1)
+    entry_url.insert(tkinter.END, string="https://www.youtube.com/c/ChannelName/")
+
+    button_add = tkinter.Button(add_channel_window, text="Add",command = add_channel)
+    button_add.grid(column=0, row=3)
+
+    button_cancel = tkinter.Button(add_channel_window, text="Cancel", command=add_channel_window.destroy)
+    button_cancel.grid(column=1, row=3)
+
+
+    add_channel_window.mainloop()
+
+def delete_channel_window():
+    def delete_channel():
+        name = entry_channel.get()
+        for index, channel in enumerate(CHANNELS['channels']):
+            if name == channel['name']:
+                input = messagebox.askquestion(title="Delete channel",
+                                       message=f"are you sure you want to delete, {name} and all it's video's?",
+                                       parent=delete_channel_window)
+                if input == 'yes':
+                    CHANNELS['channels'].pop(index)
+                    CHANNELS.pop(name)
+                    write_json(CHANNELS, CHANNEL_JSON)
+                    init_database()
+                    redraw_channel_names()
+                    delete_channel_window.destroy()
+                    return
+        messagebox.showerror(title="Error", 
+                             message="Channel not found",
+                             parent=delete_channel_window)
+
+
+    delete_channel_window = tkinter.Tk()
+    delete_channel_window.title("Add Channel")
+    delete_channel_window.config(padx=20, pady=20)
+
+
+    label_channel = tkinter.Label(delete_channel_window, text="Channel Name: ")
+    label_channel.grid(column=0, row=0)
+
+    entry_channel = tkinter.Entry(delete_channel_window, width=30)
+    entry_channel.grid(column=1, row=0)
+
+    button_add = tkinter.Button(delete_channel_window, text="Delete",command = delete_channel)
+    button_add.grid(column=0, row=3)
+
+    button_cancel = tkinter.Button(delete_channel_window, text="Cancel", command=delete_channel_window.destroy)
+    button_cancel.grid(column=1, row=3)
+
+
+    delete_channel_window.mainloop()
+
 def video_window(channel_name):
     """Makes a window for a given channel and lists all videotitles with a checkbutton, """
     window_name = tkinter.Tk()
@@ -167,176 +336,16 @@ def video_window(channel_name):
 
     window_name.mainloop()
 
-#Get the length of the longest string from channels
-def get_max_button_length():
-    chan_list = list()
-    for channel in CHANNELS['channels']:
-        if channel == "channels":
-            continue
-        chan_list.append(channel['name'])
-        if len(chan_list) >= 1:
-            max_string = max(chan_list, key=len)
-            max_len = len(max_string)
-            button_width = max_len
-        else:
-            button_width = 5
-    return button_width
-
-def check_unseen(channel_name):
-    for channel in CHANNELS[channel_name]:
-        if channel['seen'] == False:
-            return True
-    return False
-
-
-
-
-
-print(check_unseen("NileBlue"))
-
-#Makes buttons for each channel name
-def draw_channel_names():
-    column_int = 0
-    row_int = 0
-    button_width = get_max_button_length()
-    for channel in CHANNELS['channels']:
-        if channel == "channels":
-            continue
-        
-        name = channel['name']
-        open_channel = partial(video_window,name)
-#        tkinter.Button(text=name, command=open_channel).pack()
-        if column_int == 3:
-            row_int += 1
-            column_int = 0
-        if check_unseen(name):
-            name += "*"
-        tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
-        column_int +=1
-    root.geometry("")
-
-#Removes all widgets in root placed with pack, then make them again.
-def redraw_channel_names():
-    list = root.grid_slaves()
-    for l in list:
-        l.destroy()
-    #Makes them again
-    draw_channel_names()
-
-
-#Make window "Add channel" 
-def add_channel_window():
-
-    def add_channel():
-        name = entry_channel.get()
-        url = entry_url.get()
-        for channel in CHANNELS['channels']:
-            if not url_check(url):
-                messagebox.showerror("Error", "Incorrect URL format", parent=add_channel_window)
-                return
-            elif name == channel['name']:
-                messagebox.showerror("Error", f"{name} already in database", parent=add_channel_window)
-                return
-            elif url == channel['url']:
-                messagebox.showerror("Error", "URL already in database", parent=add_channel_window)
-                return
-
-        CHANNELS['channels'].append({'name': name, 'url': url})
-        CHANNELS[name] = []
-        input = messagebox.askquestion(title="Scrape",
-                               message=f"""Do you want to scrape the channel now?
-                                       This may take a while depending on the uploaded video's""",
-                               parent=add_channel_window)
-        if input == 'yes':
-            scrape_channel(name, CHANNELS)
+def update_channel_window(name):
+    input = messagebox.askquestion(title="Update channel",
+                       message=f"""Do you want to update the channel now?
+                               This may take a while depending on the uploaded video's""",
+                       parent=root)
+    if input == 'yes':
+        updates = update_channel(name, CHANNELS)
         write_json(CHANNELS, CHANNEL_JSON)
-        init_database()
         redraw_channel_names()
-        add_channel_window.destroy()
-
-
-    def url_check(url):
-        re_http = re.compile("^https?://www.youtube.com/c/.*/$")
-        if re.search(re_http, url) is None:
-            return False
-#            button_add.config(state='disabled')
-        else:
-            return True
-#            button_add.config(state='normal')
-
-
-
-    add_channel_window = tkinter.Tk()
-    add_channel_window.title("Add Channel")
-    add_channel_window.config(padx=20, pady=20)
-
-    label_channel = tkinter.Label(add_channel_window, text="Channel Name: ")
-    label_channel.grid(column=0, row=0)
-
-    label_url = tkinter.Label(add_channel_window, text="Youtube URL: ")
-    label_url.grid(column=0, row=1)
-
-    entry_channel = tkinter.Entry(add_channel_window, width=30)
-    entry_channel.grid(column=1, row=0)
-
-    entry_url = tkinter.Entry(add_channel_window, width=30)
-    entry_url.grid(column=1, row=1)
-    entry_url.insert(tkinter.END, string="https://www.youtube.com/c/ChannelName/")
-
-    button_add = tkinter.Button(add_channel_window, text="Add",command = add_channel)
-    button_add.grid(column=0, row=3)
-
-    button_cancel = tkinter.Button(add_channel_window, text="Cancel", command=add_channel_window.destroy)
-    button_cancel.grid(column=1, row=3)
-
-
-    add_channel_window.mainloop()
-
-
-def delete_channel_window():
-    def delete_channel():
-        name = entry_channel.get()
-        for index, channel in enumerate(CHANNELS['channels']):
-            if name == channel['name']:
-                input = messagebox.askquestion(title="Delete channel",
-                                       message=f"are you sure you want to delete, {name} and all it's video's?",
-                                       parent=delete_channel_window)
-                if input == 'yes':
-                    CHANNELS['channels'].pop(index)
-                    CHANNELS.pop(name)
-                    write_json(CHANNELS, CHANNEL_JSON)
-                    init_database()
-                    redraw_channel_names()
-                    delete_channel_window.destroy()
-                    return
-        messagebox.showerror(title="Error", 
-                             message="Channel not found",
-                             parent=delete_channel_window)
-
-
-    delete_channel_window = tkinter.Tk()
-    delete_channel_window.title("Add Channel")
-    delete_channel_window.config(padx=20, pady=20)
-
-
-    label_channel = tkinter.Label(delete_channel_window, text="Channel Name: ")
-    label_channel.grid(column=0, row=0)
-
-    entry_channel = tkinter.Entry(delete_channel_window, width=30)
-    entry_channel.grid(column=1, row=0)
-
-    button_add = tkinter.Button(delete_channel_window, text="Delete",command = delete_channel)
-    button_add.grid(column=0, row=3)
-
-    button_cancel = tkinter.Button(delete_channel_window, text="Cancel", command=delete_channel_window.destroy)
-    button_cancel.grid(column=1, row=3)
-
-
-    delete_channel_window.mainloop()
-
-
-def donothing():
-   x = 0
+        messagebox.showinfo(title="Updates", message=updates, parent=root)
    
 #Add menubar at top
 menubar = tkinter.Menu(root)
