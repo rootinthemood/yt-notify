@@ -51,14 +51,16 @@ def update_channel(channel_name, channel_list):
                 temp_videos.remove(video)
     #Prints found videos and inserts temp list(new videos) to main 'CHANNELS' dictionary
     if len(temp_videos) <= 0:
-        print(f"{channel_name}\t - No new videos found")
-        return
+        return f"{channel_name}\t - No new videos found"
+#        print(f"{channel_name}\t - No new videos found")
+#        return
     else:
         count = 0
         for video in temp_videos:
             channel_list[channel_name].insert(0, video)
             count += 1
-    print(f"{channel_name}\t - {count} new video(s) found.")
+    return f"{channel_name}\t - {count} new video(s) found."
+#    print(f"{channel_name}\t - {count} new video(s) found.")
 
 
 def update_all_channels(channel_list):
