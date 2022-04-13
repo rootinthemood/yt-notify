@@ -11,6 +11,7 @@ import re
 from pystray import MenuItem as item
 import pystray
 from PIL import Image, ImageTk
+from notifypy import Notify
 
 
 CHANNELS = dict()
@@ -36,6 +37,7 @@ root.minsize(width=150, height=172)
 root.config(padx=20, pady=20)
 #root.tk.call('tk', 'scaling', 1.0)
 
+
 ########### Functions for systray###########
 def quit_window(icon, item):
     icon.stop()
@@ -48,7 +50,7 @@ def show_window(icon, item):
 def hide_window():
     root.withdraw()
     image=Image.open("./images/icon.ico")
-    menu=(item('Quit', quit_window), item('Show', show_window))
+    menu=(item('Show', show_window),item("Update all channels", notify_update), item('Quit', quit_window))
     icon=pystray.Icon("name", image, "yt-notify", menu)
     icon.run()
 ########### End Functions for systray###########
@@ -214,7 +216,7 @@ def video_window(channel_name):
 #    window_name.tk.call('tk', 'scaling', 1.0)
 
     def save():
-        """Saves the values from all checkboxes to CHANNELS and writes them to CHANNELS_JSON"""
+        """Saves the values from all checkboxes to CHANNELS and writes them to CHANNEL_JSON"""
         for key, value in var_list.items():
             for index, video in enumerate(CHANNELS[channel_name]):
                 if key == video['video_id']: 
@@ -352,19 +354,41 @@ def update_channel_window(name):
         redraw_channel_names()
         messagebox.showinfo(title="Updates", message=updates, parent=root)
 
-def update_all_channels_window():
-    input = messagebox.askquestion(title="Update all channels",
-                       message=f"""Do you want to update all channels?
-                               This may take a while depending on the uploaded video's""",
-                       parent=root)
-    if input == 'yes':
-        updates = update_all_channels(CHANNELS)
-        string = ""
-        for update in updates:
-            string += update + "\n"
-        write_json(CHANNELS, CHANNEL_JSON)
-        redraw_channel_names()
-        messagebox.showinfo(title="Updates", message=string, parent=root)
+#def update_all_channels_window():
+#    input = messagebox.askquestion(title="Update all channels",
+#                       message=f"""Do you want to update all channels?
+#                               This may take a while depending on the uploaded video's""",
+#                       parent=root)
+#    if input == 'yes':
+#        updates = update_all_channels(CHANNELS)
+#        string = ""
+#        for update in updates:
+#            string += update + "\n"
+#        write_json(CHANNELS, CHANNEL_JSON)
+#        redraw_channel_names()
+#        messagebox.showinfo(title="Updates", message=string, parent=root)
+
+def notify_update():
+    updates = update_all_channels(CHANNELS)
+    text = ""
+    count_no = 0
+    for channel in updates:
+        if channel[0] == 'no':
+            count_no += 1
+#           text += f"{channel[1]} - {channel[2]}\n" 
+        elif channel[0] == 'yes':
+           text += f"{channel[1]} - {channel[2]} new video(s)\n" 
+    if count_no == len(updates):
+        text = "No new videos"
+
+    notify = Notify()
+    notify.title = "Title"
+    notify.message = text
+    notify.send()
+    redraw_channel_names()
+    write_json(CHANNELS, CHANNEL_JSON)
+
+
    
 #Add menubar at top
 menubar = tkinter.Menu(root)
@@ -372,7 +396,7 @@ filemenu = tkinter.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Add channel", command=add_channel_window)
 #filemenu.add_command(label="Delete channel", command=delete_channel_window)
 filemenu.add_separator()
-filemenu.add_command(label="Update all channels", command=update_all_channels_window)
+filemenu.add_command(label="Update all channels", command=notify_update)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="Menu", menu=filemenu)
