@@ -8,6 +8,10 @@ from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, up
 from functools import partial
 import webbrowser
 import re
+from pystray import MenuItem as item
+import pystray
+from PIL import Image, ImageTk
+
 
 CHANNELS = dict()
 CHANNEL_JSON = "test.json"
@@ -32,7 +36,22 @@ root.minsize(width=150, height=172)
 root.config(padx=20, pady=20)
 #root.tk.call('tk', 'scaling', 1.0)
 
+########### Functions for systray###########
+def quit_window(icon, item):
+    icon.stop()
+    root.destroy()
 
+def show_window(icon, item):
+    icon.stop()
+    root.after(0, root.deiconify())
+
+def hide_window():
+    root.withdraw()
+    image=Image.open("./images/icon.ico")
+    menu=(item('Quit', quit_window), item('Show', show_window))
+    icon=pystray.Icon("name", image, "yt-notify", menu)
+    icon.run()
+########### End Functions for systray###########
 
 #Get the length of the longest string from channels
 def get_max_button_length():
@@ -374,6 +393,8 @@ root.config(menu=menubar)
 #    print("Screen height:", screen_height)
 #window_size()
 draw_channel_names()
+
+root.protocol('WM_DELETE_WINDOW', hide_window)
 
 #window_size()
 root.mainloop()
