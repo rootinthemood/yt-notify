@@ -15,22 +15,10 @@ def scrape_channel(channel_name, channel_list):
         channel_list[channel_name].append({'video_id': video_id, 'title': title, 'seen': False})
 
 
-
 def scrape_all_channels(channel_list):
     for channel in channel_list['channels']:
         channel_name = channel['name']
         scrape_channel(channel_name, channel_list)
-#        scrape_channel(channel, channel_list)
-#    """Scrapes all videos and titles for each channel and appends them in channel_list"""
-#    #Writes the channel names in channel_list with an empy list as value
-#    for channel in channel_list['channels']:
-#            channel_list[channel['name']] = []
-#    for channel in channel_list['channels']:
-#        videos = scrapetube.get_channel(channel_url=channel['url'])
-#        for video in videos:
-#            video_id = video['videoId']
-#            title = video['title']['runs'][0]['text']
-#            channel_list[channel['name']].append({'video_id': video_id, 'title': title, 'seen': ""})
 
 
 def update_channel(channel_name, channel_list):
@@ -60,15 +48,12 @@ def update_channel(channel_name, channel_list):
             #Prints found videos and inserts temp list(new videos) to main 'CHANNELS' dictionary
             if len(temp_videos) <= 0:
                 return f"{channel_name}\t - No new videos found"
-        #        print(f"{channel_name}\t - No new videos found")
-        #        return
             else:
                 count = 0
                 for video in reversed(temp_videos):
                     channel_list[channel_name].insert(0, video)
                     count += 1
             return f"{channel_name}\t - {count} new video(s) found."
-        #    print(f"{channel_name}\t - {count} new video(s) found.")
 
 
 def update_all_channels(channel_list):
