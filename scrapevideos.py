@@ -30,7 +30,7 @@ def update_channel(channel_name, channel_list):
             #Keeps scraping videos until the new videos found is less then limit count
             while True:
                 temp_videos = []
-                print(limit_count)
+#                print(limit_count)
                 videos = scrapetube.get_channel(channel_url=channel['url'], limit=limit_count)
                 for video in videos:
                     video_id = video['videoId']

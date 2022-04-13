@@ -1,8 +1,8 @@
-import json
 import os
+import json
+import re
 import tkinter
 import webbrowser
-import re
 import pystray
 import platform
 from functions import write_json, init_database, get_max_button_length, check_unseen, url_check
@@ -15,10 +15,9 @@ from PIL import Image, ImageTk
 from notifypy import Notify
 
 PLATFORM = platform.system()
-CHANNELS = dict()
 CHANNEL_JSON = "./data/data.json"
 CHANNELS = init_database(CHANNEL_JSON)
-#SCALING = ('tk', 'scaling', 1.0)
+SCALING = ('tk', 'scaling', 1)
 
 
 ########### Functions for systray ###############
@@ -60,7 +59,6 @@ def draw_channel_names():
         #Check if channel has unseen videos, if so put astericks after name
         if check_unseen(name, CHANNELS):
             name += "*"
-
         menub = tkinter.Menubutton(root, text=name,width=button_width, relief='raised')
         menub.grid(column=column_int, row=row_int)
         menub.menu = tkinter.Menu(menub, tearoff=0)
@@ -70,6 +68,11 @@ def draw_channel_names():
         menub.menu.add_separator()
         menub.menu.add_command(label="Remove channel", command=delete)
         column_int +=1
+    #Prints text in root if no channels are added
+    if len(root.winfo_children()) <= 1: 
+        add_label = tkinter.Label(root, text="Add channels to list them here.")
+        add_label.grid(column=0, row=0)
+
     root.geometry("")
 
 #Removes all widgets in root placed with grid, then make them again.
@@ -327,13 +330,36 @@ def notify_update():
     write_json(CHANNELS, CHANNEL_JSON)
     redraw_channel_names()
 
+def about_window():
+    about = tkinter.Toplevel()
+    about.title("About")
+    about.minsize(width=500, height=300)
+    about.config(padx=20, pady=20)
+
+    canvas = tkinter.Canvas(about, width=150 , height=150)
+    canvas.pack(side='left', anchor='n')
+    logo = ImageTk.PhotoImage(Image.open('./images/icon.png'))
+    canvas.create_image(20, 20, anchor='nw', image=logo)
+    
+    titel = tkinter.Label(about, text="yt-notify", font=('Ariel', 24, 'bold', 'italic'))
+    titel.pack(side='top', anchor='e')
+    version = tkinter.Label(about, text="version: 0.1", font=('Ariel', 10, 'italic'))
+    version.pack(side='top', anchor='e')
+    version = tkinter.Label(about, text="rbr", font=('Ariel', 10, 'italic'))
+    version.pack(side='top', anchor='e')
+
+    about.mainloop()
+
+
 if __name__ == "__main__":
 
     root = tkinter.Tk()
     root.title("yt-notify")
-    root.minsize(width=150, height=172)
+    icon = tkinter.PhotoImage(file = './images/icon.png')
+    root.iconphoto(False, icon)
+    root.minsize(width=300, height=172)
     root.config(padx=20, pady=20)
-    #root.tk.call('tk', 'scaling', 1.0)
+#    root.tk.call(SCALING)
 
     #Add menubar at top
     menubar = tkinter.Menu(root)
@@ -345,16 +371,14 @@ if __name__ == "__main__":
     filemenu.add_command(label="Exit", command=root.destroy)
     menubar.add_cascade(label="Menu", menu=filemenu)
 
-    #    helpmenu = tkinter.Menu(menubar, tearoff=0)
-    #    helpmenu.add_command(label="Help Index", command=donothing)
-    #    helpmenu.add_command(label="About...", command=donothing)
-    #    menubar.add_cascade(label="Help", menu=helpmenu)
+    helpmenu = tkinter.Menu(menubar, tearoff=0)
+#    helpmenu.add_command(label="Help Index", command=donothing)
+    helpmenu.add_command(label="About...", command=about_window)
+    menubar.add_cascade(label="Help", menu=helpmenu)
 
     root.config(menu=menubar)
 
     draw_channel_names()
-
-
 
     root.protocol('WM_DELETE_WINDOW', hide_window)
     root.mainloop()
