@@ -12,11 +12,11 @@ from pystray import MenuItem as item
 import pystray
 from PIL import Image, ImageTk
 from notifypy import Notify
+import platform
 
-
+PLATFORM = platform.system()
 CHANNELS = dict()
 CHANNEL_JSON = "test.json"
-
 
 if not os.path.isfile(CHANNEL_JSON):
     with open(CHANNEL_JSON, 'w') as f:
@@ -140,15 +140,22 @@ def add_channel_window():
         CHANNELS['channels'].append({'name': name, 'url': url})
         CHANNELS[name] = []
         input = messagebox.askquestion(title="Scrape",
-                               message=f"""Do you want to scrape the channel now?
-                                       This may take a while depending on the uploaded video's""",
-                               parent=add_channel_window)
+                               message=f"Do you want to scrape the channel now?\nThis may take a while depending on the uploaded video's", parent=add_channel_window)
         if input == 'yes':
-            scrape_channel(name, CHANNELS)
-        write_json(CHANNELS, CHANNEL_JSON)
-        init_database()
-        redraw_channel_names()
-        add_channel_window.destroy()
+            try:
+                scrape_channel(name, CHANNELS)
+            except:
+                messagebox.showerror("Error", "Channel probably not found", parent=add_channel_window)
+                for index, channel in enumerate(CHANNELS['channels']):
+                    if name == channel['name']:
+                        CHANNELS['channels'].pop(index)
+                        CHANNELS.pop(name)
+                        return
+
+            write_json(CHANNELS, CHANNEL_JSON)
+            init_database()
+            redraw_channel_names()
+            add_channel_window.destroy()
 
 
     def url_check(url):
@@ -382,11 +389,15 @@ def notify_update():
         text = "No new videos"
 
     notify = Notify()
-    notify.title = "Title"
+    notify.title = "yt-notify"
     notify.message = text
+    notify.icon = ""
+    notify.icon = "./images/icon.ico"
+    if PLATFORM == 'Darwin':
+        notify.icon = ""
     notify.send()
-    redraw_channel_names()
     write_json(CHANNELS, CHANNEL_JSON)
+    redraw_channel_names()
 
 
    
@@ -398,7 +409,7 @@ filemenu.add_command(label="Add channel", command=add_channel_window)
 filemenu.add_separator()
 filemenu.add_command(label="Update all channels", command=notify_update)
 filemenu.add_separator()
-filemenu.add_command(label="Exit", command=root.quit)
+filemenu.add_command(label="Exit", command=root.destroy)
 menubar.add_cascade(label="Menu", menu=filemenu)
 
 #    helpmenu = tkinter.Menu(menubar, tearoff=0)
