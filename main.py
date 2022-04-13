@@ -36,17 +36,18 @@ root.config(padx=20, pady=20)
 
 #Get the length of the longest string from channels
 def get_max_button_length():
-    chan_list = list()
-    for channel in CHANNELS['channels']:
-        if channel == "channels":
-            continue
-        chan_list.append(channel['name'])
-        if len(chan_list) >= 1:
-            max_string = max(chan_list, key=len)
-            max_len = len(max_string)
-            button_width = max_len
-        else:
-            button_width = 5
+    chan_list = [channel['name'] for channel in CHANNELS['channels'] if not channel == "channels"]
+#    chan_list = list()
+#    for channel in CHANNELS['channels']:
+#        if channel == "channels":
+#            continue
+#        chan_list.append(channel['name'])
+    if len(chan_list) >= 1:
+        max_string = max(chan_list, key=len)
+        max_len = len(max_string)
+        button_width = max_len
+    else:
+        button_width = 5
     return button_width
 
 #Checks if channel has unseen videos
@@ -66,18 +67,20 @@ def draw_channel_names():
             continue
         
         name = channel['name']
-        open_channel = partial(video_window,name)
 #        tkinter.Button(text=name, command=open_channel).pack()
         if column_int == 3:
             row_int += 1
             column_int = 0
+        open_channel = partial(video_window,name)
         check_vid = partial(video_window, name)
         update = partial(update_channel_window, name)
         delete = partial(delete_channel, name)
+        #Check if channel has unseen videos, if so put astericks after name
         if check_unseen(name):
             name += "*"
+
 #        tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
-        menub = tkinter.Menubutton(root, text=name,width=button_width, relief='groove')
+        menub = tkinter.Menubutton(root, text=name,width=button_width, relief='raised')
         menub.grid(column=column_int, row=row_int)
         menub.menu = tkinter.Menu(menub, tearoff=0)
         menub["menu"] = menub.menu
@@ -88,7 +91,7 @@ def draw_channel_names():
         column_int +=1
     root.geometry("")
 
-#Removes all widgets in root placed with pack, then make them again.
+#Removes all widgets in root placed with grid, then make them again.
 def redraw_channel_names():
     list = root.grid_slaves()
     for l in list:
@@ -186,13 +189,13 @@ def video_window(channel_name):
     """Makes a window for a given channel and lists all videotitles with a checkbutton, """
     window_name = tkinter.Tk()
     window_name.title(channel_name)
-    window_name.minsize(width=780, height=900)
-    window_name.maxsize(width=780, height=900)
+    window_name.minsize(height=900, width=780)
+#    window_name.maxsize(width=780, height=900)
     window_name.config(padx=20, pady=20)
 #    window_name.tk.call('tk', 'scaling', 1.0)
 
     def save():
-        """Saves the values from all checkboxes to CHANNELS and writes them to JSON_LOCATION"""
+        """Saves the values from all checkboxes to CHANNELS and writes them to CHANNELS_JSON"""
         for key, value in var_list.items():
             for index, video in enumerate(CHANNELS[channel_name]):
                 if key == video['video_id']: 
@@ -228,22 +231,24 @@ def video_window(channel_name):
     canvas = tkinter.Canvas(window_name)
     scroll_y = ttk.Scrollbar(window_name, orient='vertical', command=canvas.yview)
     frame = tkinter.Frame(canvas)
+    frame.configure(borderwidth=2, relief='sunken')
+    frame.pack()
 
     label_channel_name = tkinter.Label(window_name, text=channel_name, font=('Ariel', 20, 'bold'))
     label_channel_name.pack(side='top')
 
     frame_title_seen = tkinter.Frame(window_name)
-    frame_title_seen.pack(side='top')
+    frame_title_seen.pack(side='top', fill='x')
 
     #Make Title and Seen labels
     label_title = tkinter.Label(frame_title_seen, text="Title", font=('Ariel', 12, 'bold'))
-    label_title.grid(column=0, row=0, pady=5)
+    label_title.pack(side='left')
 
-    label_title = tkinter.Label(frame_title_seen, text="\t\t\t\t\t\t", font=('Ariel', 12, 'bold'))
-    label_title.grid(column=1, row=0, pady=5)
+#    label_title = tkinter.Label(frame_title_seen, text="\t\t\t\t\t\t", font=('Ariel', 12, 'bold'))
+#    label_title.grid(column=1, row=0, pady=5)
 
     label_seen = tkinter.Label(frame_title_seen, text="Seen", font=('Ariel', 12, 'bold'))
-    label_seen.grid(column=2, row=0, pady=5)
+    label_seen.pack(side='right')
 
 
 
@@ -272,14 +277,15 @@ def video_window(channel_name):
     button_uncheck.pack(side='bottom', anchor='e')
 
     #Make Label for title and checkbox for seen for every video
-    label_channels=[]
     var_list={}
-    binds=[]
 
 
     for index, channel in enumerate(CHANNELS[channel_name]):
         #Make title shorter if too long
         title = channel['title']
+ #       if len(title) < 57:
+ #           count = 57 - len(title)
+ #           title += "-" * count
         if len(title) > 57:
             title = title[0:57]
 
