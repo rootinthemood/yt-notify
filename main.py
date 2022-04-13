@@ -1,45 +1,27 @@
 import json
 import os
 import tkinter
-from tkinter import messagebox
-from tkinter import ttk
-from functions import return_id_title_seen, set_channel_seen, print_id_title_seen, remove_channel, write_json
-from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, update_all_channels
-from functools import partial
 import webbrowser
 import re
-from pystray import MenuItem as item
 import pystray
+import platform
+from functions import write_json, init_database, get_max_button_length, check_unseen, url_check
+from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, update_all_channels
+from tkinter import ttk
+from tkinter import messagebox
+from functools import partial
+from pystray import MenuItem as item
 from PIL import Image, ImageTk
 from notifypy import Notify
-import platform
 
 PLATFORM = platform.system()
 CHANNELS = dict()
-CHANNEL_JSON = "test.json"
+CHANNEL_JSON = "./data/data.json"
+CHANNELS = init_database(CHANNEL_JSON)
 #SCALING = ('tk', 'scaling', 1.0)
 
-if not os.path.isfile(CHANNEL_JSON):
-    with open(CHANNEL_JSON, 'w') as f:
-        to_write = {'channels': []}
-        json.dump(to_write, f)
 
-def init_database():
-    global CHANNELS
-    with open(CHANNEL_JSON, 'r') as f:
-        CHANNELS = json.load(f)
-
-init_database()
-###############################3############################3############################3
-
-root = tkinter.Tk()
-root.title("yt-notify")
-root.minsize(width=150, height=172)
-root.config(padx=20, pady=20)
-#root.tk.call('tk', 'scaling', 1.0)
-
-
-########### Functions for systray###########
+########### Functions for systray ###############
 def quit_window(icon, item):
     icon.stop()
     root.destroy()
@@ -54,31 +36,15 @@ def hide_window():
     menu=(item('Show', show_window),item("Update all channels", notify_update), item('Quit', quit_window))
     icon=pystray.Icon("name", image, "yt-notify", menu)
     icon.run()
-########### End Functions for systray###########
+########### End Functions for systray ###########
 
-#Get the length of the longest string from channels
-def get_max_button_length():
-    chan_list = [channel['name'] for channel in CHANNELS['channels'] if not channel == "channels"]
-    if len(chan_list) >= 1:
-        max_string = max(chan_list, key=len)
-        max_len = len(max_string)
-        button_width = max_len
-    else:
-        button_width = 5
-    return button_width
 
-#Checks if channel has unseen videos
-def check_unseen(channel_name):
-    for channel in CHANNELS[channel_name]:
-        if channel['seen'] == False:
-            return True
-    return False
 
 #Makes buttons for each channel name
 def draw_channel_names():
     column_int = 0
     row_int = 0
-    button_width = get_max_button_length()
+    button_width = get_max_button_length(CHANNELS)
     for channel in CHANNELS['channels']:
         if channel == "channels":
             continue
@@ -92,7 +58,7 @@ def draw_channel_names():
         update = partial(update_channel_window, name)
         delete = partial(delete_channel, name)
         #Check if channel has unseen videos, if so put astericks after name
-        if check_unseen(name):
+        if check_unseen(name, CHANNELS):
             name += "*"
 
         menub = tkinter.Menubutton(root, text=name,width=button_width, relief='raised')
@@ -147,18 +113,9 @@ def add_channel_window():
                         return
 
             write_json(CHANNELS, CHANNEL_JSON)
-            init_database()
+            init_database(CHANNEL_JSON)
             redraw_channel_names()
             add_channel_window.destroy()
-
-
-    def url_check(url):
-        re_http = re.compile("^https?://www.youtube.com/c/.*/$")
-        if re.search(re_http, url) is None:
-            return False
-        else:
-            return True
-
 
 
     add_channel_window = tkinter.Tk()
@@ -187,6 +144,7 @@ def add_channel_window():
 
     add_channel_window.mainloop()
 
+#Deletes all data from data.json for given channel
 def delete_channel(name):
     for index, channel in enumerate(CHANNELS['channels']):
         if name == channel['name']:
@@ -197,7 +155,7 @@ def delete_channel(name):
                 CHANNELS['channels'].pop(index)
                 CHANNELS.pop(name)
                 write_json(CHANNELS, CHANNEL_JSON)
-                init_database()
+                init_database(CHANNEL_JSON)
                 redraw_channel_names()
                 return
             return
@@ -205,6 +163,7 @@ def delete_channel(name):
                          message="Channel not found",
                          parent=root)
 
+#Draws all the videos including checkboxes for the given channel
 def video_window(channel_name):
     """Makes a window for a given channel and lists all videotitles with a checkbutton, """
     window_name = tkinter.Tk()
@@ -293,8 +252,6 @@ def video_window(channel_name):
 
     #Make Label for title and checkbox for seen for every video
     var_list={}
-
-
     for index, channel in enumerate(CHANNELS[channel_name]):
         #Make title shorter if too long
         title = channel['title']
@@ -310,7 +267,7 @@ def video_window(channel_name):
         label.bind("<Leave>", on_leave)
         label.grid(column=0, row=index+1, sticky="W")
         
-        #Sets checkbox on/off for for video true/false
+        #Sets checkbox on/off for video true/false
         if channel['seen'] == True:
             var_list[channel['video_id']]= tkinter.IntVar(frame, value=1)
         else:
@@ -331,14 +288,22 @@ def video_window(channel_name):
 
     window_name.mainloop()
 
+#Draws update channel window and asks if users wants to update, if so then scrape and update channel.
 def update_channel_window(name):
     input = messagebox.askquestion(title="Update channel",
                        message=f"Do you want to update the channel now?\nThis may take a while depending on the uploaded video's",
                        parent=root)
     if input == 'yes':
-        notify_update()
+        updates = update_channel(name, CHANNELS)
+        if updates[0] == 'no':
+            text = f"{name} has no new videos"
+        elif updates[0] == 'yes':
+           text = f"{updates[1]} - {updates[2]} new video(s)\n" 
+        write_json(CHANNELS, CHANNEL_JSON)
+        redraw_channel_names()
+        messagebox.showinfo(title="Updates", message=text, parent=root)
 
-
+#Updates all channels and then gives a notification of found videos for each channel
 def notify_update():
     updates = update_all_channels(CHANNELS)
     text = ""
@@ -362,28 +327,35 @@ def notify_update():
     write_json(CHANNELS, CHANNEL_JSON)
     redraw_channel_names()
 
+if __name__ == "__main__":
 
-#Add menubar at top
-menubar = tkinter.Menu(root)
-filemenu = tkinter.Menu(menubar, tearoff=0)
-filemenu.add_command(label="Add channel", command=add_channel_window)
-filemenu.add_separator()
-filemenu.add_command(label="Update all channels", command=notify_update)
-filemenu.add_separator()
-filemenu.add_command(label="Exit", command=root.destroy)
-menubar.add_cascade(label="Menu", menu=filemenu)
+    root = tkinter.Tk()
+    root.title("yt-notify")
+    root.minsize(width=150, height=172)
+    root.config(padx=20, pady=20)
+    #root.tk.call('tk', 'scaling', 1.0)
 
-#    helpmenu = tkinter.Menu(menubar, tearoff=0)
-#    helpmenu.add_command(label="Help Index", command=donothing)
-#    helpmenu.add_command(label="About...", command=donothing)
-#    menubar.add_cascade(label="Help", menu=helpmenu)
+    #Add menubar at top
+    menubar = tkinter.Menu(root)
+    filemenu = tkinter.Menu(menubar, tearoff=0)
+    filemenu.add_command(label="Add channel", command=add_channel_window)
+    filemenu.add_separator()
+    filemenu.add_command(label="Update all channels", command=notify_update)
+    filemenu.add_separator()
+    filemenu.add_command(label="Exit", command=root.destroy)
+    menubar.add_cascade(label="Menu", menu=filemenu)
 
-root.config(menu=menubar)
+    #    helpmenu = tkinter.Menu(menubar, tearoff=0)
+    #    helpmenu.add_command(label="Help Index", command=donothing)
+    #    helpmenu.add_command(label="About...", command=donothing)
+    #    menubar.add_cascade(label="Help", menu=helpmenu)
 
-draw_channel_names()
+    root.config(menu=menubar)
+
+    draw_channel_names()
 
 
 
-root.protocol('WM_DELETE_WINDOW', hide_window)
-root.mainloop()
+    root.protocol('WM_DELETE_WINDOW', hide_window)
+    root.mainloop()
 

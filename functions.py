@@ -1,72 +1,45 @@
 import json
+import os
 import re
-from prettytable import PrettyTable
 
+#Initializes the json file if not found. Then loads the json file
+def init_database(json_location):
+    if not os.path.isfile(json_location):
+        with open(json_location, 'w') as f:
+            to_write = {'channels': []}
+            json.dump(to_write, f)
+
+    with open(json_location, 'r') as f:
+        data = json.load(f)
+        return data
+
+#Writes everything from channel_list to json_location
 def write_json(channel_list, json_location):
     with open (json_location, 'w') as f:
         json.dump(channel_list, f, indent=2)
 
-def add_channel(channel_list):
-    """Adds a channel and url to channel_list"""
-    re_http = re.compile("^https?://www.youtube.com/c/.*/$")
-    while True:
-        name = input("Channel name: ")
-        for channel in channel_list['channels']:
-            if name == channel['name']:
-                print(f"{name} already in database")
-                return
+#Get the length of the longest string from channels
+def get_max_button_length(channel_list):
+    chan_list = [channel['name'] for channel in channel_list['channels'] if not channel == "channels"]
+    if len(chan_list) >= 1:
+        max_string = max(chan_list, key=len)
+        max_len = len(max_string)
+        button_width = max_len
+    else:
+        button_width = 5
+    return button_width
 
-        url = input("Channel url: ")
-        for channel in channel_list['channels']:
-            if url == channel['url']:
-                print(f"url already in database")
-                return
-            if re.search(re_http, url) is None:
-                print("URL is not the correct format")
-                return
-        break
-    channel_list['channels'].append({'name': name, 'url': url})
-
-
-def remove_channel(name, channel_list): 
-    """Removes a channel in 'channels:' and all of it'v videos"""
-    for index, channel in enumerate(channel_list['channels']):
-        if name == channel['name']:
-            if input(f"are you sure you want to delete, {name} and all it's video's? 'y/n'") == "y":
-                channel_list['channels'].pop(index)
-                channel_list.pop(name)
-        else:
-            print("Channel not found")
-
-
-def return_id_title_seen(channel_name, channel_list):
-    """Returns title ,videoid and seen for a given channel"""
-    video_id_list = []
-    title_list = []
-    seen_list = []
-    for id in range(len(channel_list[channel_name])):
-        video_id = channel_list[channel_name][id]['video_id']
-        title = channel_list[channel_name][id]['title']
-        seen = channel_list[channel_name][id]['seen']
-        video_id_list.append(video_id)
-        title_list.append(title)
-        seen_list.append(seen)
-    return(video_id_list, title_list, seen_list)
-
-
-def print_id_title_seen(channel_name, channel_list):
-    id_title = return_id_title_seen(channel_name, channel_list)
-
-    pt = PrettyTable()
-    pt.add_column("VideoId", id_title[0])
-    pt.add_column("Title", id_title[1])
-    pt.add_column("Seen", id_title[2])
-    pt.align = "l"
-    print(pt)
-
-
-def set_channel_seen(channel_name, channel_list, boolean):
-    """Sets the boolean True or False for all videos for the given channel"""
+#Checks if channel has unseen videos
+def check_unseen(channel_name, channel_list):
     for channel in channel_list[channel_name]:
-        channel.update({"seen": boolean})
+        if channel['seen'] == False:
+            return True
+    return False
 
+#Check if url matches youtube url
+def url_check(url):
+    re_http = re.compile("^https?://www.youtube.com/c/.*/$")
+    if re.search(re_http, url) is None:
+        return False
+    else:
+        return True
