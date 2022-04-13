@@ -17,6 +17,7 @@ import platform
 PLATFORM = platform.system()
 CHANNELS = dict()
 CHANNEL_JSON = "test.json"
+#SCALING = ('tk', 'scaling', 1.0)
 
 if not os.path.isfile(CHANNEL_JSON):
     with open(CHANNEL_JSON, 'w') as f:
@@ -58,11 +59,6 @@ def hide_window():
 #Get the length of the longest string from channels
 def get_max_button_length():
     chan_list = [channel['name'] for channel in CHANNELS['channels'] if not channel == "channels"]
-#    chan_list = list()
-#    for channel in CHANNELS['channels']:
-#        if channel == "channels":
-#            continue
-#        chan_list.append(channel['name'])
     if len(chan_list) >= 1:
         max_string = max(chan_list, key=len)
         max_len = len(max_string)
@@ -88,7 +84,6 @@ def draw_channel_names():
             continue
         
         name = channel['name']
-#        tkinter.Button(text=name, command=open_channel).pack()
         if column_int == 3:
             row_int += 1
             column_int = 0
@@ -100,7 +95,6 @@ def draw_channel_names():
         if check_unseen(name):
             name += "*"
 
-#        tkinter.Button(text=name,width=button_width, command=open_channel).grid(column=column_int, row=row_int)
         menub = tkinter.Menubutton(root, text=name,width=button_width, relief='raised')
         menub.grid(column=column_int, row=row_int)
         menub.menu = tkinter.Menu(menub, tearoff=0)
@@ -162,10 +156,8 @@ def add_channel_window():
         re_http = re.compile("^https?://www.youtube.com/c/.*/$")
         if re.search(re_http, url) is None:
             return False
-#            button_add.config(state='disabled')
         else:
             return True
-#            button_add.config(state='normal')
 
 
 
@@ -218,7 +210,6 @@ def video_window(channel_name):
     window_name = tkinter.Tk()
     window_name.title(channel_name)
     window_name.minsize(height=900, width=780)
-#    window_name.maxsize(width=780, height=900)
     window_name.config(padx=20, pady=20)
 #    window_name.tk.call('tk', 'scaling', 1.0)
 
@@ -272,12 +263,8 @@ def video_window(channel_name):
     label_title = tkinter.Label(frame_title_seen, text="Title", font=('Ariel', 12, 'bold'))
     label_title.pack(side='left')
 
-#    label_title = tkinter.Label(frame_title_seen, text="\t\t\t\t\t\t", font=('Ariel', 12, 'bold'))
-#    label_title.grid(column=1, row=0, pady=5)
-
     label_seen = tkinter.Label(frame_title_seen, text="Seen", font=('Ariel', 12, 'bold'))
     label_seen.pack(side='right')
-
 
 
     #Make a frame for save and close button
@@ -311,15 +298,11 @@ def video_window(channel_name):
     for index, channel in enumerate(CHANNELS[channel_name]):
         #Make title shorter if too long
         title = channel['title']
- #       if len(title) < 57:
- #           count = 57 - len(title)
- #           title += "-" * count
         if len(title) > 57:
             title = title[0:57]
 
         #Make label for each title
         label = tkinter.Label(frame, text=title, cursor='hand2', font=('Ariel', 12))
-#        label_channels.append(label)
         link = "https://www.youtube.com/watch?v=" + channel['video_id'] 
         #Make binds for each label and put on grid
         label.bind("<ButtonRelease-1>", lambda e, link=link: webbrowser.open_new_tab(link))
@@ -327,7 +310,6 @@ def video_window(channel_name):
         label.bind("<Leave>", on_leave)
         label.grid(column=0, row=index+1, sticky="W")
         
-
         #Sets checkbox on/off for for video true/false
         if channel['seen'] == True:
             var_list[channel['video_id']]= tkinter.IntVar(frame, value=1)
@@ -347,33 +329,15 @@ def video_window(channel_name):
     scroll_y.pack(fill='y', side='right')
 
 
-
     window_name.mainloop()
 
 def update_channel_window(name):
     input = messagebox.askquestion(title="Update channel",
-                       message=f"""Do you want to update the channel now?
-                               This may take a while depending on the uploaded video's""",
+                       message=f"Do you want to update the channel now?\nThis may take a while depending on the uploaded video's",
                        parent=root)
     if input == 'yes':
-        updates = update_channel(name, CHANNELS)
-        write_json(CHANNELS, CHANNEL_JSON)
-        redraw_channel_names()
-        messagebox.showinfo(title="Updates", message=updates, parent=root)
+        notify_update()
 
-#def update_all_channels_window():
-#    input = messagebox.askquestion(title="Update all channels",
-#                       message=f"""Do you want to update all channels?
-#                               This may take a while depending on the uploaded video's""",
-#                       parent=root)
-#    if input == 'yes':
-#        updates = update_all_channels(CHANNELS)
-#        string = ""
-#        for update in updates:
-#            string += update + "\n"
-#        write_json(CHANNELS, CHANNEL_JSON)
-#        redraw_channel_names()
-#        messagebox.showinfo(title="Updates", message=string, parent=root)
 
 def notify_update():
     updates = update_all_channels(CHANNELS)
@@ -382,7 +346,6 @@ def notify_update():
     for channel in updates:
         if channel[0] == 'no':
             count_no += 1
-#           text += f"{channel[1]} - {channel[2]}\n" 
         elif channel[0] == 'yes':
            text += f"{channel[1]} - {channel[2]} new video(s)\n" 
     if count_no == len(updates):
@@ -400,12 +363,10 @@ def notify_update():
     redraw_channel_names()
 
 
-   
 #Add menubar at top
 menubar = tkinter.Menu(root)
 filemenu = tkinter.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Add channel", command=add_channel_window)
-#filemenu.add_command(label="Delete channel", command=delete_channel_window)
 filemenu.add_separator()
 filemenu.add_command(label="Update all channels", command=notify_update)
 filemenu.add_separator()
@@ -419,21 +380,10 @@ menubar.add_cascade(label="Menu", menu=filemenu)
 
 root.config(menu=menubar)
 
-#def window_size():
-#    root.update()
-#    screen_width = root.winfo_width()
-#    screen_height = root.winfo_height()
-#
-#    print("Screen width:", screen_width)
-#    print("Screen height:", screen_height)
-#window_size()
 draw_channel_names()
 
+
+
 root.protocol('WM_DELETE_WINDOW', hide_window)
-
-#window_size()
 root.mainloop()
-
-#videos_window(CHANNELS, "V for Valentine", CHANNEL_JSON)
-#root_window(CHANNELS, CHANNEL_JSON)
 
