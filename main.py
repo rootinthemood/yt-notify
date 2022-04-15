@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import json
 import re
@@ -57,9 +58,14 @@ def draw_channel_names():
         update = partial(update_channel_window, name)
         delete = partial(delete_channel, name)
         #Check if channel has unseen videos, if so put astericks after name
-        if check_unseen(name, CHANNELS):
-            name += "*"
+#        if check_unseen(name, CHANNELS):
+#            name += "*"
         menub = tkinter.Menubutton(root, text=name,width=button_width, relief='raised')
+        if check_unseen(name, CHANNELS):
+            menub.config(fg='red')
+        else:
+            menub.config(fg='blue')
+
         menub.grid(column=column_int, row=row_int)
         menub.menu = tkinter.Menu(menub, tearoff=0)
         menub["menu"] = menub.menu
