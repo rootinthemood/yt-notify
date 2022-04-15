@@ -38,8 +38,11 @@ def check_unseen(channel_name, channel_list):
 
 #Check if url matches youtube url
 def url_check(url):
-    re_http = re.compile("^https?://www.youtube.com/c/.*/$")
-    if re.search(re_http, url) is None:
-        return False
-    else:
+    re_http = re.compile("^https?://www.youtube.com/c/.*$")
+    re_http2 = re.compile("^https?://www.youtube.com/channel/.*$")
+    if re.search(re_http, url):
         return True
+    elif re.search(re_http2, url):
+        return True
+    else:
+        return False
