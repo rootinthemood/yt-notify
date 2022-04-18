@@ -8,7 +8,6 @@ from PyQt6.QtGui import QAction, QIcon, QFont
 from videos_window import VideoWindow
 from functools import partial
 
-
 PLATFORM = platform.system()
 CHANNEL_JSON = "./data/data.json"
 CHANNELS = init_database(CHANNEL_JSON)
