@@ -94,6 +94,7 @@ class Ui_Form(object):
         self.treeWidget.setSortingEnabled(False)
         self.treeWidget.headerItem().setText(0, _translate("Form", "Title"))
         self.treeWidget.headerItem().setText(1, _translate("Form", "Seen"))
+        self.treeWidget.headerItem().setText(2, _translate("Form", "video_id"))
         self.button_save.setText(_translate("Form", "Save"))
         self.button_close.setText(_translate("Form", "Close"))
         self.button_check.setText(_translate("Form", "Check All"))

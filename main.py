@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
             column_int += 1
 
     def openVideoWindow(self, name):
-        self.new_video_window = VideoWindow(CHANNELS, name)
+        self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON)
         self.new_video_window.show()
             
 
