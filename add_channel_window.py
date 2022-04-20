@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QScrollArea, QVBoxLayout, QTreeWidgetItem, QMessageBox
 from PyQt6.QtGui import QAction, QIcon, QFont
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, pyqtSignal
 from PyQt6 import QtCore
 from functions import init_database, write_json, url_check
 from add_channel_window_ui import Ui_add_channel
@@ -9,12 +9,22 @@ from scrapevideos import scrape_channel
 
 
 class addChannelWindow(QWidget):
+    #Make signal for closeEvent
+    trigger = pyqtSignal()
 
     def __init__(self, channel_list, json_location):
         super().__init__()
         self.channel_list = channel_list
         self.json_location = json_location
         self.initializeUI()
+
+    #Emit a signal when window is closed
+    def closeEvent(self, evnt):
+            super(addChannelWindow, self).closeEvent(evnt)
+            evnt.accept()
+            self.trigger.emit()
+
+
 
     def initializeUI(self):
         self.ui = Ui_add_channel()
