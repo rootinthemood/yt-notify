@@ -1,13 +1,17 @@
 import sys
+import os
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QScrollArea, QVBoxLayout, QTreeWidgetItem
 from PyQt6.QtGui import QAction, QIcon, QFont
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, pyqtSignal
 from PyQt6 import QtCore
 from functions import init_database, write_json
 from video_window_ui import Ui_Form
+from functools import partial
+import webbrowser
 
 
 class VideoWindow(QWidget):
+    trigger = pyqtSignal()
 
     def __init__(self, channel_list, channel_name, json_location):
         super().__init__()
@@ -23,17 +27,14 @@ class VideoWindow(QWidget):
         self.setWindowIcon(QIcon("images/icon.ico"))
         self.ui.label_title.setText(self.channel_name)
 
-        short_title = ""
+        #Connect contextmenu to treewidget
+        self.ui.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.treeWidget.customContextMenuRequested.connect(self.menuContextTree)
+
         for index, channel in enumerate(self.channel_list[self.channel_name]):
             video_id = channel['video_id']
             title = channel['title']
-            if len(title) > 57:
-                short_title = title[0:52] + "..."
-            elif len(title) <= 57:
-                short_title = title[0:len(title)] +  (57 - len(title)) * " "
-            else:
-                short_title = title
-            item = QTreeWidgetItem(self.ui.treeWidget, [short_title])
+            item = QTreeWidgetItem(self.ui.treeWidget, [title])
             item.setToolTip(0, title)
             item.setText(2, video_id)
 
@@ -43,8 +44,10 @@ class VideoWindow(QWidget):
                 item.setCheckState(1, QtCore.Qt.CheckState.Unchecked)
 
 
+
+        self.ui.treeWidget.setColumnWidth(0, 400)
         self.ui.treeWidget.setColumnHidden(2, True)
-        self.ui.treeWidget.resizeColumnToContents(0)
+#        self.ui.treeWidget.resizeColumnToContents(0)
         self.resize(500, 729)
 
         self.ui.button_close.clicked.connect(self.close)
@@ -83,7 +86,39 @@ class VideoWindow(QWidget):
                     elif state.value == 0:
                         self.channel_list[self.channel_name][index]['seen'] = False
         write_json(self.channel_list, self.json_location)
-        print(self.channel_list[self.channel_name])
+        self.trigger.emit()
+
+    #Make a contextmenu per item in treewidget
+    def menuContextTree(self, point):
+        # Infos about the node selected.
+        index = self.ui.treeWidget.indexAt(point)
+
+        if not index.isValid():
+            return
+
+        item = self.ui.treeWidget.itemAt(point)
+        video_id = item.text(2)  # The text of the node.
+        yt_link = "https://www.youtube.com/watch?v=" + video_id
+
+        # We build the menu.
+        menu = QMenu()
+        self.play_mpv = QAction("&Play with mpv")
+        self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: os.system(f"mpv {yt_link}"))
+        self.play_vlc = QAction("&Play with VLC")
+        self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: os.system(f'vlc "{yt_link}"'))
+        self.open_browser = QAction("&Open in browser")
+        self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link))
+
+        action = menu.addAction(self.play_mpv)
+        action = menu.addAction(self.play_vlc)
+        action = menu.addAction(self.open_browser)
+#        menu.addSeparator()
+#        action_1 = menu.addAction("Choix 1")
+#        action_2 = menu.addAction("Choix 2")
+#        action_3 = menu.addAction("Choix 3")
+
+        menu.exec(self.ui.treeWidget.mapToGlobal(point))
+
 
 
 
