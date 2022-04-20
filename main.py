@@ -30,12 +30,13 @@ class MainWindow(QMainWindow):
 
     def createActions(self):
         """Create the application menu actions."""
-        self.update_channels = QAction("&Update all channels")
-        self.update_channels.setShortcut("Ctrl+U")
-
         self.add_channel_button = QAction("&Add channel")
         self.add_channel_button.setShortcut("Ctrl+A")
         self.add_channel_button.triggered.connect(self.add_channel)
+
+        self.update_channels = QAction("&Update all channels")
+        self.update_channels.setShortcut("Ctrl+U")
+
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
@@ -49,8 +50,8 @@ class MainWindow(QMainWindow):
         self.menuBar().setNativeMenuBar(False)
 
         file_menu = self.menuBar().addMenu("File")
-        file_menu.addAction(self.update_channels)
         file_menu.addAction(self.add_channel_button)
+        file_menu.addAction(self.update_channels)
         file_menu.addAction(self.quit_act)
 
         file_menu2 = self.menuBar().addMenu("Help")
@@ -76,6 +77,12 @@ class MainWindow(QMainWindow):
             name = channel['name']
 
             self.chan_button = QPushButton(name, self)
+            
+            #sets text color for buttons
+            if check_unseen(name, CHANNELS):
+                self.chan_button.setStyleSheet('color: red')
+            else:
+                self.chan_button.setStyleSheet('color: green')
 
 
             menu = QMenu()
@@ -95,14 +102,17 @@ class MainWindow(QMainWindow):
             self.main_grid.addWidget(self.chan_button, row_int, column_int)
             column_int += 1
 
+
         if self.main_grid.count() == 0:
             self.header = QLabel("Add channels to list them here", self)
-            self.header.setAlignment(Qt.AlignmentFlag.AlignTop)
             self.main_grid.addWidget(self.header, 0, 0)
+
+        self.main_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     def openVideoWindow(self, name):
         self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON)
         self.new_video_window.show()
+        self.new_video_window.trigger.connect(self.handle_trigger)
 
     def remove_channel(self, name):
         for index, channel in enumerate(CHANNELS['channels']):
