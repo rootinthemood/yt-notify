@@ -14,7 +14,6 @@ CHANNEL_JSON = "./data/data.json"
 CHANNELS = init_database(CHANNEL_JSON)
 
 class MainWindow(QMainWindow):
-
     def __init__(self):
         super().__init__()
         self.initializeUI()
@@ -120,12 +119,13 @@ class MainWindow(QMainWindow):
                     self.setUpMainWindow()
 
     def add_channel(self):
-        value = self.add_channel_window = addChannelWindow(CHANNELS, CHANNEL_JSON)
-        value.show()
-        if value:
-            self.setUpMainWindow()
-        
+        self.add_channel_window = addChannelWindow(CHANNELS, CHANNEL_JSON)
+        self.add_channel_window.show()
+        #connect the trigger to the signal of addChannelWindow
+        self.add_channel_window.trigger.connect(self.handle_trigger)
 
+    def handle_trigger(self):
+        self.setUpMainWindow()
 
 
 
