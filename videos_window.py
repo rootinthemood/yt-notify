@@ -8,6 +8,8 @@ from functions import init_database, write_json
 from video_window_ui import Ui_Form
 from functools import partial
 import webbrowser
+import threading
+import subprocess
 
 
 class VideoWindow(QWidget):
@@ -103,21 +105,28 @@ class VideoWindow(QWidget):
         # We build the menu.
         menu = QMenu()
         self.play_mpv = QAction("&Play with mpv")
-        self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: os.system(f"mpv {yt_link}"))
+        self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["mpv", yt_link]))
         self.play_vlc = QAction("&Play with VLC")
-        self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: os.system(f'vlc "{yt_link}"'))
+        self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["vlc", yt_link]))
         self.open_browser = QAction("&Open in browser")
         self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link))
 
         action = menu.addAction(self.play_mpv)
         action = menu.addAction(self.play_vlc)
         action = menu.addAction(self.open_browser)
-#        menu.addSeparator()
-#        action_1 = menu.addAction("Choix 1")
-#        action_2 = menu.addAction("Choix 2")
-#        action_3 = menu.addAction("Choix 3")
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
+
+#    def playMpv(self, yt_link):
+#        print(yt_link)
+#        threading.Thread(target=self.test, args=(yt_link,), daemon=True).start()
+#        threading.Thread(target=lambda: print('test')).start()
+
+#    def test(self, yt_link):
+#        os.system(f"mpv {yt_link}")
+
+
+        
 
 
 
