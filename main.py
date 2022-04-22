@@ -8,6 +8,7 @@ from PyQt6.QtGui import QAction, QIcon, QFont
 from videos_window import VideoWindow
 from functools import partial
 from add_channel_window import addChannelWindow
+from systray import SystemTrayIcon
 
 PLATFORM = platform.system()
 CHANNEL_JSON = "./data/data.json"
@@ -24,7 +25,6 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon("images/icon.ico"))
 
         self.setUpMainWindow()
-        self.setupSysTray()
         self.createActions()
         self.createMenu()
         self.show()
@@ -110,27 +110,6 @@ class MainWindow(QMainWindow):
 
         self.main_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-    def setupSysTray(self):
-        self.systemTray = QSystemTrayIcon(self)
-        self.systemTray.setIcon(QIcon("images/icon.png"))
-        self.systemTray.show()
-#        # Create the menu
-        menu = QMenu()
-        self.action = QAction("Show")
-        self.action.triggered.connect(self.parent)
-        menu.addAction(self.action)
-#
-#        # Add a Quit option to the menu.
-        self.quit = QAction("Quit")
-        self.quit.triggered.connect(self.showParent)
-        menu.addAction(self.quit)
-#
-#        # Add the menu to the tray
-        self.systemTray.setContextMenu(menu)
-        self.systemTray.setVisible(True)
-    
-    def showParent(self):
-        self.parent().show()
 
     def openVideoWindow(self, name):
         self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON)
@@ -168,5 +147,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
-#    window.setupSysTray()
+    systray = SystemTrayIcon(QIcon("images/icon.png"), window)
+    systray.show()
     sys.exit(app.exec())
