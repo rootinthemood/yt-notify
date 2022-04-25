@@ -19,9 +19,9 @@ class addChannelWindow(QWidget):
         self.initializeUI()
 
     #Emit a signal when window is closed
-    def closeEvent(self, evnt):
-            super(addChannelWindow, self).closeEvent(evnt)
-            evnt.accept()
+    def closeEvent(self, event):
+            super(addChannelWindow, self).closeEvent(event)
+            event.accept()
             self.trigger.emit()
 
 

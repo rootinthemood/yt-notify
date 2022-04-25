@@ -31,10 +31,18 @@ def get_max_button_length(channel_list):
 
 #Checks if channel has unseen videos
 def check_unseen(channel_name, channel_list):
+    count = 0
     for channel in channel_list[channel_name]:
         if channel['seen'] == False:
-            return True
-    return False
+            count += 1
+            continue
+    return count
+
+#def check_unseen(channel_name, channel_list):
+#    for channel in channel_list[channel_name]:
+#        if channel['seen'] == False:
+#            return True
+#    return False
 
 #Check if url matches youtube url
 def url_check(url):

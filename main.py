@@ -1,14 +1,15 @@
 #!/usr/bin/python
 import os, sys, json, re, platform
 from functions import write_json, init_database, get_max_button_length, check_unseen, url_check
-from scrapevideos import scrape_channel, scrape_all_channels ,update_channel, update_all_channels
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon
+from scrapevideos import scrape_channel, scrape_all_channels ,UpdateChannel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QAction, QIcon, QFont
 from videos_window import VideoWindow
 from functools import partial
 from add_channel_window import addChannelWindow
 from systray import SystemTrayIcon
+from pynotifier import Notification
 
 PLATFORM = platform.system()
 CHANNEL_JSON = "./data/data.json"
@@ -24,24 +25,36 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("yt-notify")
         self.setWindowIcon(QIcon("images/icon.ico"))
 
+
         self.setUpMainWindow()
         self.createActions()
         self.createMenu()
+#        self.notify_platform()
+
+
+
         self.show()
+
+
 
     def createActions(self):
         """Create the application menu actions."""
         self.add_channel_button = QAction("&Add channel")
         self.add_channel_button.setShortcut("Ctrl+A")
+        self.add_channel_button.setStatusTip("Add a youtube channel to follow")
         self.add_channel_button.triggered.connect(self.add_channel)
 
         self.update_channels = QAction("&Update all channels")
+#        self.update_channels.setStatusTip("Updates al channels one by one")
         self.update_channels.setShortcut("Ctrl+U")
+        update = partial(self.update_channel, "")
+#        update = partial(UpdateChannel.update_channel, channel_list=CHANNELS)
+        self.update_channels.triggered.connect(update)
 
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
-        self.quit_act.triggered.connect(self.close)
+        self.quit_act.triggered.connect(sys.exit)
 
 
         self.about = QAction("About")
@@ -59,6 +72,10 @@ class MainWindow(QMainWindow):
         file_menu2.addAction(self.about)
 
     def setUpMainWindow(self):
+        #Make statusbar
+        self.setStatusBar(QStatusBar())
+        self.statusBar().showMessage("Welcome back!", 1000)
+
         column_int = 0
         row_int = 0
         self.main_grid = QGridLayout()
@@ -80,10 +97,13 @@ class MainWindow(QMainWindow):
             self.chan_button = QPushButton(name, self)
             
             #sets text color for buttons
-            if check_unseen(name, CHANNELS):
+            unseen_vids = check_unseen(name, CHANNELS)
+            if unseen_vids > 0:
                 self.chan_button.setStyleSheet('color: red')
+                self.chan_button.setStatusTip(f"Unwatched videos: {unseen_vids}")
             else:
                 self.chan_button.setStyleSheet('color: green')
+                self.chan_button.setStatusTip(f"Unwatched videos: {unseen_vids}")
 
 
             menu = QMenu()
@@ -93,7 +113,9 @@ class MainWindow(QMainWindow):
             video_menu.triggered.connect(open_channel)
 
             menu.addSeparator()
-            menu.addAction("Update Channel")
+            update_menu = menu.addAction("Update Channel")
+            update_channel = partial(self.update_channel, name)
+            update_menu.triggered.connect(update_channel)
 
             remove_channel_menu = menu.addAction("Remove Channel")
             delete_channel = partial(self.remove_channel, name)
@@ -109,7 +131,6 @@ class MainWindow(QMainWindow):
             self.main_grid.addWidget(self.header, 0, 0)
 
         self.main_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
-
 
     def openVideoWindow(self, name):
         self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON)
@@ -139,7 +160,28 @@ class MainWindow(QMainWindow):
     def handle_trigger(self):
         self.setUpMainWindow()
 
+    def notify_platform(self):
+        icon = "images/icon.ico"
+        if PLATFORM == "Linux":
+            icon = "images/icon.png"
+        Notification(title="Title",
+                     description="Description",
+                     icon_path=icon,
+                     duration=5,
+                     urgency="normal").send()
 
+    def update_channel(self, names):
+        #Testing signals/trigger for updateting channels in statusbar
+        if names == "":
+            names = [name for name in CHANNELS if name != "channels"]
+        self.updateChannel = UpdateChannel(names, CHANNELS)
+        self.updateChannel.trigger_update.connect(self.update_event)
+        self.updateChannel.update_channel()
+
+    def update_event(self, name):
+        self.statusBar().showMessage(f"Updating: {name}")
+#        self.setStatusTip(f"Updating: {name}")
+        print(f"Updating: {name}")
 
 
 
@@ -147,6 +189,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
-    systray = SystemTrayIcon(QIcon("images/icon.png"), window)
+    systray = SystemTrayIcon(QIcon("images/icon.ico"), window)
     systray.show()
     sys.exit(app.exec())
