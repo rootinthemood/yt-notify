@@ -1,8 +1,10 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from PyQt6.QtGui import QAction, QIcon, QFont
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QThread
 
 class SystemTrayIcon(QSystemTrayIcon):
+    update_signal = pyqtSignal(bool)
 
     def __init__(self, icon, parent=None):
         QSystemTrayIcon.__init__(self, icon, parent)
@@ -33,4 +35,5 @@ class SystemTrayIcon(QSystemTrayIcon):
         self.parent().show()
 
     def updateAll(self):
-        pass
+        self.update_signal.emit(True)
+        

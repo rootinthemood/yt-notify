@@ -1,9 +1,9 @@
 #!/usr/bin/python
 import os, sys, json, re, platform
 from functions import write_json, init_database, get_max_button_length, check_unseen, url_check
-from scrapevideos import scrape_channel, scrape_all_channels ,UpdateChannel
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar
-from PyQt6.QtCore import Qt, QSize
+from scrapevideos import scrape_channel, scrape_all_channels, UpdateChannel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
+from PyQt6.QtCore import Qt, QSize, QThread
 from PyQt6.QtGui import QAction, QIcon, QFont
 from videos_window import VideoWindow
 from functools import partial
@@ -35,7 +35,66 @@ class MainWindow(QMainWindow):
 
         self.show()
 
+#    def update_channel(self, names):
+#        #Testing signals/trigger for updateting channels in statusbar
+#        if names == "":
+#            names = [name for name in CHANNELS if name != "channels"]
+#        self.updateChannel = UpdateChannel(names, CHANNELS)
+#        self.updateChannel.trigger_update.connect(self.update_event)
+#        self.updateChannel.update_channel()
 
+    def update_all_systray(self):
+        self.update_all_clicked("")
+
+
+    #Runs when Update All Channels is clicked
+    def update_all_clicked(self, names):
+        self.progressBar.setHidden(False)
+        self.progressBar.setValue(0)
+        if names == "":
+            names = [name for name in CHANNELS if name != "channels"]
+        self.worker = UpdateChannel(names, CHANNELS)
+        self.worker.start()
+        self.worker.finished.connect(self.update_all_clicked_finished)
+        self.worker.update_progress.connect(self.update_all_clicked_progress)
+        self.worker.worker_complete.connect(self.notify_on_complete)
+
+    #Gets a list of tuples with the amount of new videos and a dict with the total videos(CHANNELS) 
+    #from scrapevideos.py->UpdateChannel class. Writes the dict to database
+    #and sends a notification to the user with new videos found. 
+    def notify_on_complete(self, lst, dct):
+        write_json(dct, CHANNEL_JSON)
+        self.setUpMainWindow()
+        total_channels = len(lst)
+        count = 0
+        text = ""
+        for channel in lst:
+            if channel[0] == 'no':
+                count += 1
+                if count == total_channels:
+                    self.notify_platform("No new videos")
+#                    QMessageBox.information(self, "Done!", "No new videos")
+                    return
+                continue
+            text += f"{channel[1]} - {channel[2]} new video(s)\n" 
+            continue
+        self.notify_platform(text)
+#        QMessageBox.information(self, "Done!", text)
+
+
+    #Function that runs when progress is updated via update_all_clicked
+    def update_all_clicked_progress(self, val):
+        self.progressBar.setValue(val)
+
+    #Function that runs when progress is finished via update_all_clicked
+    def update_all_clicked_finished(self):
+        self.progressBar.setHidden(True)
+        self.progressBar.setValue(0)
+        print("finished")
+
+#    def update_event(self, name):
+#        self.setStatusTip(f"Updating: {name}")
+#        print(f"Updating: {name}")
 
     def createActions(self):
         """Create the application menu actions."""
@@ -47,9 +106,10 @@ class MainWindow(QMainWindow):
         self.update_channels = QAction("&Update all channels")
 #        self.update_channels.setStatusTip("Updates al channels one by one")
         self.update_channels.setShortcut("Ctrl+U")
-        update = partial(self.update_channel, "")
+        update = partial(self.update_all_clicked, "")
 #        update = partial(UpdateChannel.update_channel, channel_list=CHANNELS)
         self.update_channels.triggered.connect(update)
+#        self.update_channels.triggered.connect(update)
 
 
         self.quit_act = QAction("&Quit")
@@ -74,7 +134,13 @@ class MainWindow(QMainWindow):
     def setUpMainWindow(self):
         #Make statusbar
         self.setStatusBar(QStatusBar())
-        self.statusBar().showMessage("Welcome back!", 1000)
+
+        self.progressBar = QProgressBar()
+        self.statusBar().addPermanentWidget(self.progressBar)
+        self.progressBar.setMaximumSize(200, 20)
+        self.progressBar.setHidden(True)
+        self.progressBar.setValue(0)
+
 
         column_int = 0
         row_int = 0
@@ -114,7 +180,7 @@ class MainWindow(QMainWindow):
 
             menu.addSeparator()
             update_menu = menu.addAction("Update Channel")
-            update_channel = partial(self.update_channel, name)
+            update_channel = partial(self.update_all_clicked, name)
             update_menu.triggered.connect(update_channel)
 
             remove_channel_menu = menu.addAction("Remove Channel")
@@ -147,7 +213,7 @@ class MainWindow(QMainWindow):
                 if answer == QMessageBox.StandardButton.Yes:
                     CHANNELS['channels'].pop(index)
                     CHANNELS.pop(name)
-                    write_json(CHANNELS, CHANNEL_JSON)
+                    write_json(CHANNELS, CHANNEL_JSON)()
                     init_database(CHANNEL_JSON)
                     self.setUpMainWindow()
 
@@ -160,28 +226,17 @@ class MainWindow(QMainWindow):
     def handle_trigger(self):
         self.setUpMainWindow()
 
-    def notify_platform(self):
+    def notify_platform(self, text):
         icon = "images/icon.ico"
         if PLATFORM == "Linux":
             icon = "images/icon.png"
         Notification(title="Title",
-                     description="Description",
+                     description=text,
                      icon_path=icon,
                      duration=5,
                      urgency="normal").send()
 
-    def update_channel(self, names):
-        #Testing signals/trigger for updateting channels in statusbar
-        if names == "":
-            names = [name for name in CHANNELS if name != "channels"]
-        self.updateChannel = UpdateChannel(names, CHANNELS)
-        self.updateChannel.trigger_update.connect(self.update_event)
-        self.updateChannel.update_channel()
 
-    def update_event(self, name):
-        self.statusBar().showMessage(f"Updating: {name}")
-#        self.setStatusTip(f"Updating: {name}")
-        print(f"Updating: {name}")
 
 
 
@@ -189,6 +244,10 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
+
     systray = SystemTrayIcon(QIcon("images/icon.ico"), window)
+    sys_update_all = partial(window.update_all_clicked, "")
+    systray.update_signal.connect(sys_update_all)
     systray.show()
+
     sys.exit(app.exec())
