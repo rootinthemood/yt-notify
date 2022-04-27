@@ -1,10 +1,9 @@
-#!/usr/bin/python
 import os, sys, json, re, platform
-from functions import write_json, init_database, get_max_button_length, check_unseen, url_check
-from scrapevideos import scrape_channel, scrape_all_channels, UpdateChannel
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
-from PyQt6.QtCore import Qt, QSize, QThread
-from PyQt6.QtGui import QAction, QIcon, QFont
+from functions import write_json, init_database, check_unseen
+from scrapevideos import UpdateChannel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QIcon
 from videos_window import VideoWindow
 from functools import partial
 from add_channel_window import addChannelWindow
@@ -14,6 +13,7 @@ from pynotifier import Notification
 PLATFORM = platform.system()
 CHANNEL_JSON = "./data/data.json"
 CHANNELS = init_database(CHANNEL_JSON)
+VERSION = "0.21"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -25,30 +25,15 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("yt-notify")
         self.setWindowIcon(QIcon("images/icon.ico"))
 
-
         self.setUpMainWindow()
         self.createActions()
         self.createMenu()
-#        self.notify_platform()
-
-
 
         self.show()
 
-#    def update_channel(self, names):
-#        #Testing signals/trigger for updateting channels in statusbar
-#        if names == "":
-#            names = [name for name in CHANNELS if name != "channels"]
-#        self.updateChannel = UpdateChannel(names, CHANNELS)
-#        self.updateChannel.trigger_update.connect(self.update_event)
-#        self.updateChannel.update_channel()
-
-    def update_all_systray(self):
-        self.update_all_clicked("")
-
-
     #Runs when Update All Channels is clicked
     def update_all_clicked(self, names):
+        """Creates a worker for UpdateChannel for given channel names"""
         self.progressBar.setHidden(False)
         self.progressBar.setValue(0)
         if names == "":
@@ -59,10 +44,12 @@ class MainWindow(QMainWindow):
         self.worker.update_progress.connect(self.update_all_clicked_progress)
         self.worker.worker_complete.connect(self.notify_on_complete)
 
-    #Gets a list of tuples with the amount of new videos and a dict with the total videos(CHANNELS) 
+    #Gets a list of tuples with the amount of new videos and a dict with the #total videos(CHANNELS) 
     #from scrapevideos.py->UpdateChannel class. Writes the dict to database
     #and sends a notification to the user with new videos found. 
     def notify_on_complete(self, lst, dct):
+        """Receives the updated 'CHANNEL' dict and writes it to json.
+        Receives the updated videos in list of tuples and sends them to notify function."""
         write_json(dct, CHANNEL_JSON)
         self.setUpMainWindow()
         total_channels = len(lst)
@@ -73,28 +60,24 @@ class MainWindow(QMainWindow):
                 count += 1
                 if count == total_channels:
                     self.notify_platform("No new videos")
-#                    QMessageBox.information(self, "Done!", "No new videos")
                     return
                 continue
             text += f"{channel[1]} - {channel[2]} new video(s)\n" 
             continue
         self.notify_platform(text)
-#        QMessageBox.information(self, "Done!", text)
 
-
-    #Function that runs when progress is updated via update_all_clicked
-    def update_all_clicked_progress(self, val):
+    def update_all_clicked_progress(self, val, name):
+        """Runs when progress is updated via update_all_clicked"""
+        text  = f"{name} - {val}%"
+        self.progressBar.setTextVisible(True)
+        self.progressBar.setFormat(text)
         self.progressBar.setValue(val)
 
-    #Function that runs when progress is finished via update_all_clicked
+
     def update_all_clicked_finished(self):
+        """Runs when progress is finished via update_all_clicked"""
         self.progressBar.setHidden(True)
         self.progressBar.setValue(0)
-        print("finished")
-
-#    def update_event(self, name):
-#        self.setStatusTip(f"Updating: {name}")
-#        print(f"Updating: {name}")
 
     def createActions(self):
         """Create the application menu actions."""
@@ -104,23 +87,26 @@ class MainWindow(QMainWindow):
         self.add_channel_button.triggered.connect(self.add_channel)
 
         self.update_channels = QAction("&Update all channels")
-#        self.update_channels.setStatusTip("Updates al channels one by one")
         self.update_channels.setShortcut("Ctrl+U")
         update = partial(self.update_all_clicked, "")
-#        update = partial(UpdateChannel.update_channel, channel_list=CHANNELS)
         self.update_channels.triggered.connect(update)
-#        self.update_channels.triggered.connect(update)
-
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.triggered.connect(sys.exit)
 
-
         self.about = QAction("About")
+        self.about.triggered.connect(self.aboutWindow)
+
+
+    def aboutWindow(self):
+        """Draws About window"""
+        QMessageBox.about(self, "About", f"""<p style=font-size:30px>yt-notify</p>
+                                             <p style=text-align:right> version {VERSION}</p>
+                                             <p style=text-align:right> rbr</p>""")
 
     def createMenu(self):
-        """Create the menu bar"""
+        """Create the top menu bar"""
         self.menuBar().setNativeMenuBar(False)
 
         file_menu = self.menuBar().addMenu("File")
@@ -132,26 +118,27 @@ class MainWindow(QMainWindow):
         file_menu2.addAction(self.about)
 
     def setUpMainWindow(self):
+        """Sets up the main Qt Window"""
         #Make statusbar
         self.setStatusBar(QStatusBar())
 
+        #Make progressbar and set it in statusbar
         self.progressBar = QProgressBar()
         self.statusBar().addPermanentWidget(self.progressBar)
         self.progressBar.setMaximumSize(200, 20)
         self.progressBar.setHidden(True)
         self.progressBar.setValue(0)
 
-
         column_int = 0
         row_int = 0
         self.main_grid = QGridLayout()
 
-        #Set the central widget(needed because of QMainWindow)
+        #Set the central widget in MainWindow
         container = QWidget()
         container.setLayout(self.main_grid)
         self.setCentralWidget(container)
 
-
+        #Create a channel button for each channel name
         for channel in CHANNELS['channels']:
             if channel == "channels":
                 continue
@@ -160,6 +147,7 @@ class MainWindow(QMainWindow):
                 column_int = 0
             name = channel['name']
 
+            #Creation of channel buttons
             self.chan_button = QPushButton(name, self)
             
             #sets text color for buttons
@@ -171,7 +159,10 @@ class MainWindow(QMainWindow):
                 self.chan_button.setStyleSheet('color: green')
                 self.chan_button.setStatusTip(f"Unwatched videos: {unseen_vids}")
 
+            #Pust name in list because UpdateChannel wants a list of channel names
+            name_lst = [name]
 
+            #Creation of dropdown menu on channel button
             menu = QMenu()
             self.chan_button.setMenu(menu)
             video_menu = menu.addAction("Videos")
@@ -180,30 +171,33 @@ class MainWindow(QMainWindow):
 
             menu.addSeparator()
             update_menu = menu.addAction("Update Channel")
-            update_channel = partial(self.update_all_clicked, name)
+            update_channel = partial(self.update_all_clicked, name_lst)
             update_menu.triggered.connect(update_channel)
 
             remove_channel_menu = menu.addAction("Remove Channel")
             delete_channel = partial(self.remove_channel, name)
             remove_channel_menu.triggered.connect(delete_channel)
 
-
+            #Puts channel buttons on the grid layout
             self.main_grid.addWidget(self.chan_button, row_int, column_int)
             column_int += 1
 
-
+        #If no channel button is found draw some text
         if self.main_grid.count() == 0:
             self.header = QLabel("Add channels to list them here", self)
             self.main_grid.addWidget(self.header, 0, 0)
 
+        #Align everything in grid layout to top
         self.main_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     def openVideoWindow(self, name):
+        """Opens the VideoWindow for a given channel name"""
         self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON)
         self.new_video_window.show()
-        self.new_video_window.trigger.connect(self.handle_trigger)
+        self.new_video_window.close_trigger.connect(self.handle_close_trigger)
 
     def remove_channel(self, name):
+        """Asks if user wants to remove given channel"""
         for index, channel in enumerate(CHANNELS['channels']):
             if name == channel['name']:
                 answer = QMessageBox.question(self,
@@ -213,31 +207,31 @@ class MainWindow(QMainWindow):
                 if answer == QMessageBox.StandardButton.Yes:
                     CHANNELS['channels'].pop(index)
                     CHANNELS.pop(name)
-                    write_json(CHANNELS, CHANNEL_JSON)()
+                    write_json(CHANNELS, CHANNEL_JSON)
                     init_database(CHANNEL_JSON)
                     self.setUpMainWindow()
 
     def add_channel(self):
+        """Opens the addChannelWindow"""
         self.add_channel_window = addChannelWindow(CHANNELS, CHANNEL_JSON)
         self.add_channel_window.show()
         #connect the trigger to the signal of addChannelWindow
-        self.add_channel_window.trigger.connect(self.handle_trigger)
+        self.add_channel_window.close_trigger.connect(self.handle_close_trigger)
 
-    def handle_trigger(self):
+    def handle_close_trigger(self):
+        """Redraws the main Qt qindow"""
         self.setUpMainWindow()
 
     def notify_platform(self, text):
-        icon = "images/icon.ico"
+        """Pushes notification to os with given text"""
+        icon = os.path.abspath("images/icon.ico")
         if PLATFORM == "Linux":
-            icon = "images/icon.png"
-        Notification(title="Title",
+            icon = os.path.abspath("images/icon.png")
+        Notification(title="yt-notify",
                      description=text,
                      icon_path=icon,
                      duration=5,
                      urgency="normal").send()
-
-
-
 
 
 if __name__ == '__main__':
@@ -249,5 +243,5 @@ if __name__ == '__main__':
     sys_update_all = partial(window.update_all_clicked, "")
     systray.update_signal.connect(sys_update_all)
     systray.show()
-
+    
     sys.exit(app.exec())

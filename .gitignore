@@ -2,3 +2,5 @@ __pycache__/
 *.json
 images/
 venv/
+requirements.txt
+Session.vim

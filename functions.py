@@ -18,17 +18,6 @@ def write_json(channel_list, json_location):
     with open (json_location, 'w') as f:
         json.dump(channel_list, f, indent=2)
 
-#Get the length of the longest string from channels
-def get_max_button_length(channel_list):
-    chan_list = [channel['name'] for channel in channel_list['channels'] if not channel == "channels"]
-    if len(chan_list) >= 1:
-        max_string = max(chan_list, key=len)
-        max_len = len(max_string)
-        button_width = max_len
-    else:
-        button_width = 5
-    return button_width
-
 #Checks if channel has unseen videos
 def check_unseen(channel_name, channel_list):
     count = 0
@@ -37,12 +26,6 @@ def check_unseen(channel_name, channel_list):
             count += 1
             continue
     return count
-
-#def check_unseen(channel_name, channel_list):
-#    for channel in channel_list[channel_name]:
-#        if channel['seen'] == False:
-#            return True
-#    return False
 
 #Check if url matches youtube url
 def url_check(url):

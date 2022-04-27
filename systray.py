@@ -1,7 +1,7 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
-from PyQt6.QtGui import QAction, QIcon, QFont
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QThread
+from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
+from PyQt6.QtGui import QAction
+from PyQt6.QtCore import pyqtSignal
 
 class SystemTrayIcon(QSystemTrayIcon):
     update_signal = pyqtSignal(bool)
@@ -13,7 +13,7 @@ class SystemTrayIcon(QSystemTrayIcon):
         self.action.triggered.connect(self.showParent)
         menu.addAction(self.action)
 
-        self.update = QAction("Update channels")
+        self.update = QAction("Update all channels")
         self.update.triggered.connect(self.updateAll)
         menu.addAction(self.update)
 

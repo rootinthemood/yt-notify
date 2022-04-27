@@ -1,19 +1,17 @@
 import sys
 import os
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit, QCheckBox, QTextEdit, QGridLayout, QMenu, QScrollArea, QVBoxLayout, QTreeWidgetItem
-from PyQt6.QtGui import QAction, QIcon, QFont
-from PyQt6.QtCore import Qt, QSize, pyqtSignal
+from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu
+from PyQt6.QtGui import QAction, QIcon 
+from PyQt6.QtCore import pyqtSignal
 from PyQt6 import QtCore
-from functions import init_database, write_json
+from functions import write_json
 from video_window_ui import Ui_Form
-from functools import partial
 import webbrowser
-import threading
 import subprocess
 
 
 class VideoWindow(QWidget):
-    trigger = pyqtSignal()
+    close_trigger = pyqtSignal()
 
     def __init__(self, channel_list, channel_name, json_location):
         super().__init__()
@@ -25,7 +23,7 @@ class VideoWindow(QWidget):
     def initializeUI(self):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        self.setWindowTitle("yt-notify")
+        self.setWindowTitle(self.channel_name)
         self.setWindowIcon(QIcon("images/icon.ico"))
         self.ui.label_title.setText(self.channel_name)
 
@@ -46,10 +44,8 @@ class VideoWindow(QWidget):
                 item.setCheckState(1, QtCore.Qt.CheckState.Unchecked)
 
 
-
         self.ui.treeWidget.setColumnWidth(0, 400)
         self.ui.treeWidget.setColumnHidden(2, True)
-#        self.ui.treeWidget.resizeColumnToContents(0)
         self.resize(500, 729)
 
         self.ui.button_close.clicked.connect(self.close)
@@ -88,11 +84,11 @@ class VideoWindow(QWidget):
                     elif state.value == 0:
                         self.channel_list[self.channel_name][index]['seen'] = False
         write_json(self.channel_list, self.json_location)
-        self.trigger.emit()
+        self.close_trigger.emit()
 
     #Make a contextmenu per item in treewidget
     def menuContextTree(self, point):
-        # Infos about the node selected.
+        # Info about the node selected.
         index = self.ui.treeWidget.indexAt(point)
 
         if not index.isValid():
@@ -102,7 +98,7 @@ class VideoWindow(QWidget):
         video_id = item.text(2)  # The text of the node.
         yt_link = "https://www.youtube.com/watch?v=" + video_id
 
-        # We build the menu.
+        #Make the menu
         menu = QMenu()
         self.play_mpv = QAction("&Play with mpv")
         self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["mpv", yt_link]))
@@ -116,23 +112,3 @@ class VideoWindow(QWidget):
         action = menu.addAction(self.open_browser)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
-
-#    def playMpv(self, yt_link):
-#        print(yt_link)
-#        threading.Thread(target=self.test, args=(yt_link,), daemon=True).start()
-#        threading.Thread(target=lambda: print('test')).start()
-
-#    def test(self, yt_link):
-#        os.system(f"mpv {yt_link}")
-
-
-        
-
-
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    main = VideoWindow()
-    main.show()
-    sys.exit(app.exec_())
