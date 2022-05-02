@@ -15,15 +15,15 @@ class addChannelWindow(QWidget):
         super().__init__()
         self.channel_list = channel_list
         self.json_location = json_location
-        self.initializeUI()
+        self.initialize_ui()
 
-    def closeEvent(self, event):
+    def close_event(self, event):
         """Overwrites the closeEvent and emits a signal on close"""
         super(addChannelWindow, self).closeEvent(event)
         event.accept()
         self.close_trigger.emit()
 
-    def initializeUI(self):
+    def initialize_ui(self):
         self.ui = Ui_add_channel()
         self.ui.setupUi(self)
         self.setWindowTitle("Add Channel")
@@ -69,10 +69,3 @@ class addChannelWindow(QWidget):
         write_json(self.channel_list, self.json_location)
         init_database(self.json_location)
         self.close()
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    main = addChannelWindow()
-    main.show()
-    sys.exit(app.exec_())

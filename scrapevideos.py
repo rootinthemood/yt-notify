@@ -37,6 +37,10 @@ class UpdateChannel(QThread):
                                 for video in temp_videos:
                                     if old_video['video_id'] == video['video_id']:
                                         temp_videos.remove(video)
+                            print(limit_count)
+                            if limit_count == 50:
+                                limit_count = 9999999999999
+                                continue
                             if len(temp_videos) == limit_count:
                                 limit_count += 20
                                 continue

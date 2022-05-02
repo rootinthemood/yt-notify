@@ -4,19 +4,27 @@ import re
 
 #Initializes the json file if not found. Then loads the json file
 def init_database(json_location):
-    if not os.path.isfile(json_location):
+    try: 
+        with open(json_location, 'r') as f:
+            data = json.load(f)
+            return data
+
+    except FileNotFoundError:
         with open(json_location, 'w') as f:
             to_write = {'channels': []}
             json.dump(to_write, f)
 
-    with open(json_location, 'r') as f:
-        data = json.load(f)
-        return data
+        with open(json_location, 'r') as f:
+            data = json.load(f)
+            return data
 
 #Writes everything from channel_list to json_location
 def write_json(channel_list, json_location):
-    with open (json_location, 'w') as f:
-        json.dump(channel_list, f, indent=2)
+    try:
+        with open (json_location, 'w') as f:
+            json.dump(channel_list, f, indent=2)
+    except FileNotFoundError:
+        print("json file not found")
 
 #Checks if channel has unseen videos
 def check_unseen(channel_name, channel_list):

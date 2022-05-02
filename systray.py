@@ -10,30 +10,30 @@ class SystemTrayIcon(QSystemTrayIcon):
         QSystemTrayIcon.__init__(self, icon, parent)
         menu = QMenu(parent)
         self.action = QAction("Show", parent=self)
-        self.action.triggered.connect(self.showParent)
+        self.action.triggered.connect(self.show_parent)
         menu.addAction(self.action)
 
         self.update = QAction("Update all channels")
-        self.update.triggered.connect(self.updateAll)
+        self.update.triggered.connect(self.update_all)
         menu.addAction(self.update)
 
-#        # Add a Quit option to the menu.
+        # Add a Quit option to the menu.
         self.quit = QAction("Quit")
-        self.quit.triggered.connect(self.exitAll)
+        self.quit.triggered.connect(self.exit_all)
         menu.addAction(self.quit)
 
 
-#        # Add the menu to the tray
+        # Add the menu to the tray
         self.setContextMenu(menu)
         self.setVisible(True)
         self.setToolTip("yt-notify")
 
-    def exitAll(self):
+    def exit_all(self):
         sys.exit()
 
-    def showParent(self):
+    def show_parent(self):
         self.parent().show()
 
-    def updateAll(self):
+    def update_all(self):
         self.update_signal.emit(True)
         
