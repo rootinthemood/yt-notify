@@ -18,9 +18,9 @@ class VideoWindow(QWidget):
         self.channel_list = channel_list
         self.channel_name = channel_name
         self.json_location = json_location
-        self.initializeUI()
+        self.initialize_ui()
 
-    def initializeUI(self):
+    def initialize_ui(self):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.setWindowTitle(self.channel_name)
@@ -29,7 +29,7 @@ class VideoWindow(QWidget):
 
         #Connect contextmenu to treewidget
         self.ui.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
-        self.ui.treeWidget.customContextMenuRequested.connect(self.menuContextTree)
+        self.ui.treeWidget.customContextMenuRequested.connect(self.menu_context_tree)
 
         for index, channel in enumerate(self.channel_list[self.channel_name]):
             video_id = channel['video_id']
@@ -51,18 +51,19 @@ class VideoWindow(QWidget):
         self.ui.button_close.clicked.connect(self.close)
         self.ui.button_save.clicked.connect(self.save)
 
-        self.ui.button_check.clicked.connect(self.checkAll)
-        self.ui.button_uncheck.clicked.connect(self.uncheckAll)
+        self.ui.button_check.clicked.connect(self.check_all)
+        self.ui.button_uncheck.clicked.connect(self.uncheck_all)
 
-
-    def checkAll(self):
+    def check_all(self):
+        """checks all checkbuttons"""
         root = self.ui.treeWidget.invisibleRootItem()
         child_count = root.childCount()
         for i in range(child_count):
             item = root.child(i)
             item.setCheckState(1, QtCore.Qt.CheckState.Checked)
 
-    def uncheckAll(self):
+    def uncheck_all(self):
+        """uncheck all checkbuttons"""
         root = self.ui.treeWidget.invisibleRootItem()
         child_count = root.childCount()
         for i in range(child_count):
@@ -70,6 +71,7 @@ class VideoWindow(QWidget):
             item.setCheckState(1, QtCore.Qt.CheckState.Unchecked)
 
     def save(self):
+        """Saves the checkbutton state to json"""
         root = self.ui.treeWidget.invisibleRootItem()
         child_count = root.childCount()
         for i in range(child_count):
@@ -86,9 +88,8 @@ class VideoWindow(QWidget):
         write_json(self.channel_list, self.json_location)
         self.close_trigger.emit()
 
-    #Make a contextmenu per item in treewidget
-    def menuContextTree(self, point):
-        # Info about the node selected.
+    def menu_context_tree(self, point):
+        """Make a contextmenu per item in treewidget"""
         index = self.ui.treeWidget.indexAt(point)
 
         if not index.isValid():
