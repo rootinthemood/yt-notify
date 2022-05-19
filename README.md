@@ -1,10 +1,15 @@
 # yt-notify
-Program that wil help you "follow" youtube channels.
+Program that wil help you follow and track youtube channels.
 
 ## Requirements
 ```bash
 pip install PyQt6 py-notifier requests scrapetube
 ```
+or
+```bash
+pip install -r requirements.txt
+```
+
 
 ## Run
 ```bash

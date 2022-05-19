@@ -4,6 +4,11 @@ import re
 
 #Initializes the json file if not found. Then loads the json file
 def init_database(json_location):
+    dir = os.path.dirname(json_location)
+
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+
     try: 
         with open(json_location, 'r') as f:
             data = json.load(f)
