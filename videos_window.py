@@ -1,5 +1,6 @@
 import sys
 import os
+import platform
 from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu
 from PyQt6.QtGui import QAction, QIcon 
 from PyQt6.QtCore import pyqtSignal
@@ -19,6 +20,8 @@ class VideoWindow(QWidget):
         self.channel_name = channel_name
         self.json_location = json_location
         self.initialize_ui()
+        self.platform = platform.system()
+
 
     def initialize_ui(self):
         self.ui = Ui_Form()
@@ -101,15 +104,17 @@ class VideoWindow(QWidget):
 
         #Make the menu
         menu = QMenu()
-        self.play_mpv = QAction("&Play with mpv")
-        self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["mpv", yt_link]))
-        self.play_vlc = QAction("&Play with VLC")
-        self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["vlc", yt_link]))
         self.open_browser = QAction("&Open in browser")
         self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link))
-
-        action = menu.addAction(self.play_mpv)
-        action = menu.addAction(self.play_vlc)
         action = menu.addAction(self.open_browser)
+
+        if self.platform == "Linux":
+            self.play_mpv = QAction("&Play with mpv")
+            self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["mpv", yt_link]))
+            self.play_vlc = QAction("&Play with VLC")
+            self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["vlc", yt_link]))
+
+            action = menu.addAction(self.play_mpv)
+            action = menu.addAction(self.play_vlc)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
