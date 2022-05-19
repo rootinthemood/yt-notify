@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 ## Run
 ```bash
-git clone http://git.vuur.io/unknown/yt-notify.git
+git clone https://git.vuur.io/unknown/yt-notify.git
 cd yt-notify
 python3 ./main.py
 ```
