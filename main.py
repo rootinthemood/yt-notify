@@ -177,6 +177,7 @@ class MainWindow(QMainWindow):
         """Draws About window"""
         QMessageBox.about(self, "About", f"""<p style=font-size:30px>yt-notify</p>
                                              <p style=text-align:right> version {VERSION}</p>
+                                             <p style=text-align:right> GPL-3.0</p>
                                              <p style=text-align:right> rbr</p>""")
 
     #Runs when Update All Channels is clicked
