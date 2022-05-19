@@ -17,6 +17,8 @@ git clone http://git.vuur.io/unknown/yt-notify.git
 cd yt-notify
 python3 ./main.py
 ```
+Or download the windows binary from "Releases"
+
 
 
 * Features
