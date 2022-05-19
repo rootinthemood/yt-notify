@@ -14,7 +14,7 @@ from pynotifier import Notification
 PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
 CHANNELS = init_database(CHANNEL_JSON)
-VERSION = "0.21"
+VERSION = "0.3"
 
 class MainWindow(QMainWindow):
     def __init__(self):
