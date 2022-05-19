@@ -68,4 +68,5 @@ class addChannelWindow(QWidget):
 
         write_json(self.channel_list, self.json_location)
         init_database(self.json_location)
+        self.close_trigger.emit()
         self.close()

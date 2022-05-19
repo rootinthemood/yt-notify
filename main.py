@@ -183,6 +183,8 @@ class MainWindow(QMainWindow):
     #Runs when Update All Channels is clicked
     def update_all_clicked(self, names):
         """Creates a worker for UpdateChannel for given channel names"""
+        self.update_channels.setEnabled(False)
+        systray.update.setEnabled(False)
         self.progressBar.setHidden(False)
         self.progressBar.setValue(0)
         if names == "":
@@ -204,6 +206,8 @@ class MainWindow(QMainWindow):
         """Runs when progress is finished via update_all_clicked"""
         self.progressBar.setHidden(True)
         self.progressBar.setValue(0)
+        self.update_channels.setEnabled(True)
+        systray.update.setEnabled(True)
 
     def handle_close_trigger(self):
         """Redraws the main Qt qindow"""
