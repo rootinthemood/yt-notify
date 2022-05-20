@@ -213,12 +213,10 @@ class MainWindow(QMainWindow):
         """Redraws the main Qt qindow"""
         self.setup_main_window()
 
-    #Gets a list of tuples with the amount of new videos and a dict with the #total videos(CHANNELS) 
-    #from scrapevideos.py->UpdateChannel class. Writes the dict to database
-    #and sends a notification to the user with new videos found. 
     def notify_on_complete(self, lst, dct):
-        """Receives the updated 'CHANNEL' dict and writes it to json.
-        Receives the updated videos in list of tuples and sends them to notify function."""
+        """Gets a list of tuples with the amount of new videos and a dict with the 'n' total videos(CHANNELS) 
+        from scrapevideos.py->UpdateChannel class. Writes the dict to database
+        and sends a notification to the user with new videos found."""
         write_json(dct, CHANNEL_JSON)
         self.setup_main_window()
         total_channels = len(lst)
