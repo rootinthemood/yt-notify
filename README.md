@@ -20,6 +20,8 @@ cd yt-notify
 python3 ./main.py
 ```
 
+Or download one of the binaries from "Releases"
+
 Tested on Linux and Windows 11
 
 
