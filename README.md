@@ -19,9 +19,6 @@ git clone https://github.com/rootinthemood/yt-notify.git
 cd yt-notify
 python3 ./main.py
 ```
-Stores its data in json format
-
-Made with PyQt6 and scrapetube
 
 Tested on Linux and Windows 11
 
