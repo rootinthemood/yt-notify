@@ -9,6 +9,7 @@ from functions import write_json
 from video_window_ui import Ui_Form
 import webbrowser
 import subprocess
+from shutil import which
 
 
 class VideoWindow(QWidget):
@@ -108,13 +109,14 @@ class VideoWindow(QWidget):
         self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link))
         action = menu.addAction(self.open_browser)
 
-        if self.platform == "Linux":
+        if which('mpv'):
             self.play_mpv = QAction("&Play with mpv")
-            self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["mpv", yt_link]))
-            self.play_vlc = QAction("&Play with VLC")
-            self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen(["vlc", yt_link]))
-
+            self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('mpv'), yt_link]))
             action = menu.addAction(self.play_mpv)
+
+        if which('vlc'):
+            self.play_vlc = QAction("&Play with VLC")
+            self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('vlc'), yt_link]))
             action = menu.addAction(self.play_vlc)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
