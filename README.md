@@ -30,4 +30,4 @@ Tested on Linux and Windows 11
     * Remove channel
     * Update channel/Update all channels
     * Open video in browser
-    * Open video in mpv/vlc (Linux)
+    * Open video in mpv/vlc
