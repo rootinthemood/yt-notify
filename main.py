@@ -9,7 +9,6 @@ from functools import partial
 from add_channel_window import addChannelWindow
 from systray import SystemTrayIcon
 from pynotifier import Notification
-#from settings_window import SettingsWindow
 
 PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
@@ -125,9 +124,6 @@ class MainWindow(QMainWindow):
         self.about = QAction("About")
         self.about.triggered.connect(self.about_window)
 
-#        self.settings = QAction("Settings")
-#        self.settings.triggered.connect(self.settings_window)
-
     def create_menu(self):
         """Create the top menu bar"""
         self.menuBar().setNativeMenuBar(False)
@@ -138,7 +134,6 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.quit_act)
 
         file_menu2 = self.menuBar().addMenu("Help")
-#        file_menu2.addAction(self.settings)
         file_menu2.addAction(self.about)
 
     def open_video_window(self, name):
@@ -168,10 +163,6 @@ class MainWindow(QMainWindow):
                     write_json(CHANNELS, CHANNEL_JSON)
                     init_database(CHANNEL_JSON)
                     self.setup_main_window()
-
-#    def settings_window(self):
-#        self.settings_window = SettingsWindow()
-#        self.settings_window.show()
 
     def error_message(self, message):
         QMessageBox.critical(self, "Error",
