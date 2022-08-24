@@ -1,11 +1,13 @@
 import scrapetube
 from PyQt6.QtCore import pyqtSignal, QThread
+from PyQt6.QtWidgets import QMessageBox
 from time import sleep
 
 
 class UpdateChannel(QThread):
     update_progress = pyqtSignal(int, str)
     worker_complete = pyqtSignal(list, dict)
+    scrape_error = pyqtSignal(str)
 
     def __init__(self, channel_name, channel_list):
         super().__init__()
@@ -13,13 +15,13 @@ class UpdateChannel(QThread):
         self.channel_list = channel_list
 
     def run(self):
-        total_channels = len(self.channel_name)
-        completed_list = []
-        """Scrapes the last 'n' videos from a channel and compares them to
-        the already saved videos and sends the completed list via an emit"""
-        #Scrapes the last 'n' videos from a given channel and appends them to a temp list
-        for channel in self.channel_list['channels']:
-            if isinstance(self.channel_name, list):
+        try:
+            total_channels = len(self.channel_name)
+            completed_list = []
+            """Scrapes the last 'n' videos from a channel and compares them to
+            the already saved videos and sends the completed list via an emit"""
+            #Scrapes the last 'n' videos from a given channel and appends them to a temp list
+            for channel in self.channel_list['channels']:
                 for index, name in enumerate(self.channel_name):
                     if name == channel['name']:
                         prog = round(((index + 1) / total_channels) * 100)
@@ -39,7 +41,6 @@ class UpdateChannel(QThread):
                                         temp_videos.remove(video)
                             if limit_count == 50:
                                 limit_count = 0
-#                                print(limit_count)
                                 continue
                             if len(temp_videos) == limit_count:
                                 limit_count += 20
@@ -57,7 +58,13 @@ class UpdateChannel(QThread):
                                 count += 1
                                 found='yes'
                             completed_list.append((found, name, count))
-        self.worker_complete.emit(completed_list, self.channel_list)
+        except:
+            print("An issue with scraping has occured")
+            self.scrape_error.emit("An issue with scraping has occured")
+            return
+        else:
+            self.worker_complete.emit(completed_list, self.channel_list)
+
 
 def scrape_channel(channel_name, channel_list):
     """CHecks if channel has videos"""

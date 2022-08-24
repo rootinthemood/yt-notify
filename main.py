@@ -173,6 +173,13 @@ class MainWindow(QMainWindow):
 #        self.settings_window = SettingsWindow()
 #        self.settings_window.show()
 
+    def error_message(self, message):
+        QMessageBox.critical(self, "Error",
+                            f"<p>" + message + "</p>",
+                            QMessageBox.StandardButton.Ok)
+
+
+
     def about_window(self):
         """Draws About window"""
         QMessageBox.about(self, "About", f"""<p style=font-size:30px>yt-notify</p>
@@ -194,6 +201,7 @@ class MainWindow(QMainWindow):
         self.worker.finished.connect(self.update_all_clicked_finished)
         self.worker.update_progress.connect(self.update_all_clicked_progress)
         self.worker.worker_complete.connect(self.notify_on_complete)
+        self.worker.scrape_error.connect(self.error_message)
 
     def update_all_clicked_progress(self, val, name):
         """Runs when progress is updated via update_all_clicked"""
