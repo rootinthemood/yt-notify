@@ -17,17 +17,25 @@ pip install -r requirements.txt
 ```bash
 git clone https://github.com/rootinthemood/yt-notify.git
 cd yt-notify
+pip install -r requirements.txt
 python3 ./main.py
 ```
 
+## Install
+If you want to install and be able to directly call 'yt-notify' from terminal.
+```bash
+git clone https://github.com/rootinthemood/yt-notify.git
+cd yt-notify
+pip install -r requirements.txt
+sudo ./setup.sh
+```
 Or download one of the binaries from "Releases"
 
-Tested on Linux and Windows 11
+Tested on Linux
 
 
 * Features
-    * Add channel
-    * Remove channel
-    * Update channel/Update all channels
+    * Add channel/Remove channel
+    * Update channel/All channels
     * Open video in browser
     * Open video in mpv/vlc
