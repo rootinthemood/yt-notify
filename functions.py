@@ -41,6 +41,15 @@ def check_unseen(channel_name, channel_list):
             continue
     return count
 
+def check_watching(channel_name, channel_list):
+    """Checks if channel has currently watching videos"""
+    count = 0
+    for channel in channel_list[channel_name]:
+        if channel['seen'] == "Watching":
+            count += 1
+            continue
+    return count
+
 def url_check(url):
     """Check if url matches youtube url"""
     re_http = re.compile("^https?://www.youtube.com/c/.*$")

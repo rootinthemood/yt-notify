@@ -41,12 +41,12 @@ class VideoWindow(QWidget):
             item = QTreeWidgetItem(self.ui.treeWidget, [title])
             item.setToolTip(0, title)
             item.setText(2, video_id)
-
             if channel['seen'] == True:
                 item.setCheckState(1, QtCore.Qt.CheckState.Checked)
+            elif channel['seen'] == "Watching":
+                item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
             else:
                 item.setCheckState(1, QtCore.Qt.CheckState.Unchecked)
-
 
         self.ui.treeWidget.setColumnWidth(0, 400)
         self.ui.treeWidget.setColumnHidden(2, True)
@@ -87,7 +87,9 @@ class VideoWindow(QWidget):
                 if video_id == video['video_id']:
                     if state.value == 2:
                         self.channel_list[self.channel_name][index]['seen'] = True
-                    elif state.value == 0:
+                    elif state.value == 1:
+                        self.channel_list[self.channel_name][index]['seen'] = "Watching"
+                    else: 
                         self.channel_list[self.channel_name][index]['seen'] = False
         write_json(self.channel_list, self.json_location)
         self.close_trigger.emit()
@@ -106,17 +108,17 @@ class VideoWindow(QWidget):
         #Make the menu
         menu = QMenu()
         self.open_browser = QAction("&Open in browser")
-        self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link))
+        self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link)) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
         action = menu.addAction(self.open_browser)
 
         if which('mpv'):
             self.play_mpv = QAction("&Play with mpv")
-            self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('mpv'), yt_link]))
+            self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('mpv'), yt_link]) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
             action = menu.addAction(self.play_mpv)
 
         if which('vlc'):
             self.play_vlc = QAction("&Play with VLC")
-            self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('vlc'), yt_link]))
+            self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('vlc'), yt_link]) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
             action = menu.addAction(self.play_vlc)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
