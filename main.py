@@ -1,5 +1,5 @@
 import os, sys, json, re, platform
-from functions import write_json, init_database, check_unseen
+from functions import write_json, init_database, check_unseen, check_watching
 from scrapevideos import UpdateChannel
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
 from PyQt6.QtCore import Qt
@@ -13,7 +13,7 @@ from pynotifier import Notification
 PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
 CHANNELS = init_database(CHANNEL_JSON)
-VERSION = "0.33"
+VERSION = "0.4"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -66,12 +66,20 @@ class MainWindow(QMainWindow):
             
             #sets text color for buttons
             unseen_vids = check_unseen(name, CHANNELS)
-            if unseen_vids > 0:
+            watching_vids = check_watching(name, CHANNELS)
+
+            if unseen_vids > 0 and watching_vids == 0:
                 self.chan_button.setStyleSheet('color: red')
-                self.chan_button.setStatusTip(f"Unwatched videos: {unseen_vids}")
-            else:
+                self.chan_button.setStatusTip(f"Not Seen: {unseen_vids}")
+            if unseen_vids > 0 and watching_vids > 0:
+                self.chan_button.setStyleSheet('color: blue')
+                self.chan_button.setStatusTip(f"Not Seen: {unseen_vids}, Watching: {watching_vids}")
+            if watching_vids > 0 and unseen_vids == 0:
+                self.chan_button.setStyleSheet('color: blue')
+                self.chan_button.setStatusTip(f"Not Seen: {unseen_vids}, Watching: {watching_vids}")
+            if unseen_vids == 0 and watching_vids == 0:
                 self.chan_button.setStyleSheet('color: green')
-                self.chan_button.setStatusTip(f"Unwatched videos: {unseen_vids}")
+                self.chan_button.setStatusTip(f"Everything seen!")
 
             #Pust name in list because UpdateChannel wants a list of channel names
             name_lst = [name]

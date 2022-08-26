@@ -35,7 +35,8 @@ Tested on Linux
 
 
 * Features
-    * Add channel/Remove channel
+    * Add/Remove channel
     * Update channel/All channels
     * Open video in browser
     * Open video in mpv/vlc
+    * Currently watching
