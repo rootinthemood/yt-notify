@@ -39,4 +39,5 @@ Tested on Linux
     * Update channel/All channels
     * Open video in browser
     * Open video in mpv/vlc
+    * mpv/VLC argument settings
     * Currently watching

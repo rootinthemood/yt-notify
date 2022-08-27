@@ -1,5 +1,5 @@
 import os, sys, json, re, platform
-from functions import write_json, init_database, check_unseen, check_watching
+from functions import write_json, init_database, check_unseen, check_watching, init_settings
 from scrapevideos import UpdateChannel
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
 from PyQt6.QtCore import Qt
@@ -7,13 +7,17 @@ from PyQt6.QtGui import QAction, QIcon
 from videos_window import VideoWindow
 from functools import partial
 from add_channel_window import addChannelWindow
+from settings_window import settingsWindow
 from systray import SystemTrayIcon
 from pynotifier import Notification
 
 PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
 CHANNELS = init_database(CHANNEL_JSON)
-VERSION = "0.4"
+SETTINGS_LOCATION = os.path.abspath("./data/settings")
+SETTINGS = init_settings(SETTINGS_LOCATION)
+
+VERSION = "0.5"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,7 +33,7 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.create_menu()
 
-        self.hide()
+        self.show()
 
     def setup_main_window(self):
         """Sets up the main Qt Window and populates it with a button for each channel"""
@@ -129,6 +133,8 @@ class MainWindow(QMainWindow):
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.triggered.connect(sys.exit)
 
+        self.settings = QAction("Settings")
+        self.settings.triggered.connect(self.open_settings_window)
         self.about = QAction("About")
         self.about.triggered.connect(self.about_window)
 
@@ -142,11 +148,17 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.quit_act)
 
         file_menu2 = self.menuBar().addMenu("Help")
+        file_menu2.addAction(self.settings)
         file_menu2.addAction(self.about)
+
+    def open_settings_window(self):
+        self.new_settings_window = settingsWindow(SETTINGS, SETTINGS_LOCATION)
+        self.new_settings_window.show()
+        self.new_settings_window.init_trigger.connect(self.re_init_settings)
 
     def open_video_window(self, name):
         """Opens the VideoWindow for a given channel name"""
-        self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON)
+        self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON, SETTINGS)
         self.new_video_window.show()
         self.new_video_window.close_trigger.connect(self.handle_close_trigger)
 
@@ -250,6 +262,12 @@ class MainWindow(QMainWindow):
                      icon_path=icon,
                      duration=5,
                      urgency="normal").send()
+
+    def re_init_settings(self):
+        global SETTINGS
+        global SETTINGS_LOCATION
+        SETTINGS_LOCATION = os.path.abspath("./data/settings")
+        SETTINGS = init_settings(SETTINGS_LOCATION)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

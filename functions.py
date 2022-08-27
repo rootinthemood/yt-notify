@@ -2,6 +2,7 @@ import json
 import os
 import re
 
+
 def init_database(json_location):
     """Initializes the data dir and the json file if not found, 
     then loads the json file"""
@@ -23,6 +24,55 @@ def init_database(json_location):
         with open(json_location, 'r') as f:
             data = json.load(f)
             return data
+
+def init_settings(settings_location):
+    try: 
+        with open(settings_location, 'r') as f:
+            for line in f:
+                if line.startswith('[mpv]'):
+                    mpv_args = f.readline().rstrip('\n')
+                if line.startswith('[vlc]'):
+                    vlc_args = f.readline().rstrip('\n')
+
+
+        return mpv_args, vlc_args
+
+    except FileNotFoundError:
+        try: 
+            with open(settings_location, 'w') as f:
+                data = "[mpv]\n\n[vlc]\n\n"
+                f.write(data)
+
+            with open(settings_location, 'r') as f:
+                for line in f:
+                    if line.startswith('[mpv]'):
+                        mpv_args = f.readline().rstrip('\n')
+                    if line.startswith('[vlc]'):
+                        vlc_args = f.readline().rstrip('\n')
+
+
+            return mpv_args, vlc_args
+
+        except FileNotFoundError:
+            print("Error")
+
+def save_settings(mpv_args, vlc_args, settings_location):
+    try: 
+        with open(settings_location, 'r') as f:
+            data = f.readlines()
+            for index, line in enumerate(data):
+                if line.startswith('[mpv]'):
+                    data[index+1] = mpv_args + '\n'
+                if line.startswith('[vlc]'):
+                    data[index+1] = vlc_args + '\n'
+    except FileNotFoundError:
+        print("File not found")
+
+    try: 
+        with open(settings_location, 'w') as f:
+            f.writelines(data)
+    except FileNotFoundError:
+        print("Error")
 
 def write_json(channel_list, json_location):
     """Writes everything from channel_list to json_location"""
