@@ -51,6 +51,7 @@ class VideoWindow(QWidget):
                 item.setCheckState(1, QtCore.Qt.CheckState.Unchecked)
 
         self.ui.treeWidget.setColumnWidth(0, 400)
+        self.ui.treeWidget.setColumnWidth(1, 10)
         self.ui.treeWidget.setColumnHidden(2, True)
         self.resize(500, 729)
 
