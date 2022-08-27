@@ -15,13 +15,15 @@ from shutil import which
 class VideoWindow(QWidget):
     close_trigger = pyqtSignal()
 
-    def __init__(self, channel_list, channel_name, json_location):
+    def __init__(self, channel_list, channel_name, json_location, settings):
         super().__init__()
         self.channel_list = channel_list
         self.channel_name = channel_name
         self.json_location = json_location
         self.initialize_ui()
         self.platform = platform.system()
+        self.mpv_args = settings[0]
+        self.vlc_args = settings[1]
 
 
     def initialize_ui(self):
@@ -112,13 +114,15 @@ class VideoWindow(QWidget):
         action = menu.addAction(self.open_browser)
 
         if which('mpv'):
+            mpv_args = which('mpv') + " " + self.mpv_args + " " + yt_link
             self.play_mpv = QAction("&Play with mpv")
-            self.play_mpv.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('mpv'), yt_link]) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
+            self.play_mpv.triggered.connect(lambda e, mpv_args=mpv_args: subprocess.Popen([mpv_args], shell=True) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
             action = menu.addAction(self.play_mpv)
 
         if which('vlc'):
+            vlc_args = which('vlc') + " " + self.vlc_args + " " + yt_link
             self.play_vlc = QAction("&Play with VLC")
-            self.play_vlc.triggered.connect(lambda e, yt_link=yt_link: subprocess.Popen([which('vlc'), yt_link]) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
+            self.play_vlc.triggered.connect(lambda e, vlc_args=vlc_args: subprocess.Popen([vlc_args], shell=True) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
             action = menu.addAction(self.play_vlc)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
