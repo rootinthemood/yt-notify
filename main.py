@@ -196,7 +196,7 @@ class MainWindow(QMainWindow):
         QMessageBox.about(self, "About", f"""<p style=font-size:30px>yt-notify</p>
                                              <p style=text-align:right> version {VERSION}</p>
                                              <p style=text-align:right> GPL-3.0</p>
-                                             <p style=text-align:right> rbr</p>""")
+                                             <p style=text-align:right> rootinthemood</p>""")
 
     #Runs when Update All Channels is clicked
     def update_all_clicked(self, names):
