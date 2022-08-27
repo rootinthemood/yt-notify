@@ -110,7 +110,7 @@ class VideoWindow(QWidget):
         #Make the menu
         menu = QMenu()
         self.open_browser = QAction("&Open in browser")
-        self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link)) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
+        self.open_browser.triggered.connect(lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
         action = menu.addAction(self.open_browser)
 
         if which('mpv'):
