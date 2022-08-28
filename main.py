@@ -14,7 +14,7 @@ from pynotifier import Notification
 PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
 CHANNELS = init_database(CHANNEL_JSON)
-SETTINGS_LOCATION = os.path.abspath("./data/settings")
+SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
 SETTINGS = init_settings(SETTINGS_LOCATION)
 
 VERSION = "0.5"
@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.create_menu()
 
-        self.show()
+        self.hide()
 
     def setup_main_window(self):
         """Sets up the main Qt Window and populates it with a button for each channel"""
