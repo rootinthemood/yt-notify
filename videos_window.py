@@ -10,6 +10,7 @@ from video_window_ui import Ui_Form
 import webbrowser
 import subprocess
 from shutil import which
+import pyperclip as pc
 
 
 class VideoWindow(QWidget):
@@ -125,5 +126,10 @@ class VideoWindow(QWidget):
             self.play_vlc = QAction("&Play with VLC")
             self.play_vlc.triggered.connect(lambda e, vlc_args=vlc_args: subprocess.Popen([vlc_args], shell=True) and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked))
             action = menu.addAction(self.play_vlc)
+
+            self.copy_link = QAction("&Copy link")
+            self.copy_link.triggered.connect(lambda e, yt_link=yt_link: pc.copy(yt_link))
+            print(yt_link)
+            action = menu.addAction(self.copy_link)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
