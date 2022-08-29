@@ -129,7 +129,6 @@ class VideoWindow(QWidget):
 
             self.copy_link = QAction("&Copy link")
             self.copy_link.triggered.connect(lambda e, yt_link=yt_link: pc.copy(yt_link))
-            print(yt_link)
             action = menu.addAction(self.copy_link)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
