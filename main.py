@@ -266,7 +266,7 @@ class MainWindow(QMainWindow):
     def re_init_settings(self):
         global SETTINGS
         global SETTINGS_LOCATION
-        SETTINGS_LOCATION = os.path.abspath("./data/settings")
+        SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
         SETTINGS = init_settings(SETTINGS_LOCATION)
 
 if __name__ == '__main__':
