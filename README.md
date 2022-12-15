@@ -29,7 +29,6 @@ cd yt-notify
 pip install -r requirements.txt
 sudo ./setup.sh
 ```
-Or download one of the binaries from "Releases"
 
 Tested on Linux
 
