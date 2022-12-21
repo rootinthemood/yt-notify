@@ -105,11 +105,14 @@ def url_check(url):
     re_http = re.compile("^https?://www.youtube.com/c/.*$")
     re_http2 = re.compile("^https?://www.youtube.com/channel/.*$")
     re_http3 = re.compile("^https?://www.youtube.com/user/.*$")
+    re_http4 = re.compile("^https?://www.youtube.com/@.*$")
     if re.search(re_http, url):
         return True
     elif re.search(re_http2, url):
         return True
     elif re.search(re_http3, url):
+        return True
+    elif re.search(re_http4, url):
         return True
     else:
         return False
