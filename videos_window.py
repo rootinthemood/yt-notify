@@ -38,9 +38,11 @@ class VideoWindow(QWidget):
         self.ui.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.treeWidget.customContextMenuRequested.connect(self.menu_context_tree)
 
+        total_vids = 0
         for index, channel in enumerate(self.channel_list[self.channel_name]):
             video_id = channel['video_id']
             title = channel['title']
+            total_vids += 1
             item = QTreeWidgetItem(self.ui.treeWidget, [title])
             item.setToolTip(0, title)
             item.setText(2, video_id)
@@ -61,6 +63,8 @@ class VideoWindow(QWidget):
 
         self.ui.button_check.clicked.connect(self.check_all)
         self.ui.button_uncheck.clicked.connect(self.uncheck_all)
+
+        self.ui.total_vids.setText(f"{total_vids}")
 
     def check_all(self):
         """checks all checkbuttons"""
