@@ -30,8 +30,10 @@ pip install -r requirements.txt
 sudo ./setup.sh
 ```
 
-Tested on Linux
+## Update
+Update to a new version? Follow Install again. All your settings will be saved.
 
+Tested on Linux
 
 * Features
     * Add/Remove channel
@@ -40,3 +42,4 @@ Tested on Linux
     * Open video in mpv/vlc
     * mpv/VLC argument settings
     * Currently watching
+    * Search for videos
