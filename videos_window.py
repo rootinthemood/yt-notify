@@ -63,8 +63,8 @@ class VideoWindow(QWidget):
         self.ui.treeWidget.setColumnHidden(2, True)
         self.resize(500, 729)
 
-        self.ui.button_close.clicked.connect(self.close)
-        self.ui.button_save.clicked.connect(self.save)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Save).clicked.connect(self.save)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Close).clicked.connect(self.close)
 
         self.ui.button_check.clicked.connect(self.check_all)
         self.ui.button_uncheck.clicked.connect(self.uncheck_all)
