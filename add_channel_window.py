@@ -33,11 +33,6 @@ class addChannelWindow(QWidget):
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).clicked.connect(self.add)
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).clicked.connect(self.close)
 
-#        self.ui.buttonBox.accepted.clicked.connect(self.add)
-#        self.ui.buttonBox.rejected.clicked.connect(self.close)
-#        self.ui.add_button.clicked.connect(self.add)
-#        self.ui.cancel_button.clicked.connect(self.close)
-
     def add(self):
         self.name = self.ui.name_edit.text()
         self.url = self.ui.url_edit.text()
