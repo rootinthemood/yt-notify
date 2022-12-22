@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file '/home/unknown/Documents/qt_designer/yt-notify/settings_window.ui'
+# Form implementation generated from reading ui file 'settings_window.ui'
 #
 # Created by: PyQt6 UI code generator 6.3.0
 #
