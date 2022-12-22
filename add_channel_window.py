@@ -2,6 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal
+from PyQt6 import QtWidgets
 from functions import init_database, write_json, url_check
 from add_channel_window_ui import Ui_add_channel
 from scrapevideos import scrape_channel
@@ -29,8 +30,13 @@ class addChannelWindow(QWidget):
         self.setWindowTitle("Add Channel")
         self.setWindowIcon(QIcon("images/icon.ico"))
 
-        self.ui.add_button.clicked.connect(self.add)
-        self.ui.cancel_button.clicked.connect(self.close)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).clicked.connect(self.add)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).clicked.connect(self.close)
+
+#        self.ui.buttonBox.accepted.clicked.connect(self.add)
+#        self.ui.buttonBox.rejected.clicked.connect(self.close)
+#        self.ui.add_button.clicked.connect(self.add)
+#        self.ui.cancel_button.clicked.connect(self.close)
 
     def add(self):
         self.name = self.ui.name_edit.text()
