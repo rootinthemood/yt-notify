@@ -31,7 +31,7 @@ sudo ./setup.sh
 ```
 
 ## Update
-Update to a new version? Follow Install again. All your settings will be saved.
+Update to a new version? Remove settings.ini in install folder and follow Install again. All your videos will be saved.
 
 Tested on Linux
 

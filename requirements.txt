@@ -4,6 +4,7 @@ charset-normalizer
 idna
 py-notifier
 pyperclip
+pyqtdarktheme
 PyQt6
 PyQt6-Qt6
 PyQt6-sip
@@ -11,3 +12,4 @@ requests
 scrapetube>=2.3.1
 typing_extensions
 urllib3
+

@@ -6,6 +6,7 @@ from functions import init_database, write_json, url_check, save_settings
 from settings_window_ui import Ui_Form
 from scrapevideos import scrape_channel
 from PyQt6 import QtCore, QtGui, QtWidgets
+import qdarktheme
 
 class settingsWindow(QWidget):
     init_trigger = pyqtSignal()
@@ -14,6 +15,7 @@ class settingsWindow(QWidget):
         super().__init__()
         self.mpv_args = settings[0]
         self.vlc_args = settings[1]
+        self.darkmode_args = settings[2]
         self.settings_location = settings_location
         self.initialize_ui()
 
@@ -28,6 +30,12 @@ class settingsWindow(QWidget):
         self.ui.mpv_args.setText(self.mpv_args)
         self.ui.vlc_args.setText(self.vlc_args)
 
+        self.ui.dark_combo.addItems(qdarktheme.get_themes())
+        index = self.ui.dark_combo.findText(self.darkmode_args, QtCore.Qt.MatchFlag.MatchFixedString)
+        if index >= 0:
+            self.ui.dark_combo.setCurrentIndex(index)
+        self.ui.dark_combo.currentTextChanged.connect(qdarktheme.setup_theme)
+
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).clicked.connect(self.close)
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Save).clicked.connect(self.save)
 
@@ -35,6 +43,7 @@ class settingsWindow(QWidget):
 
         mpv_args = self.ui.mpv_args.text()
         vlc_args = self.ui.vlc_args.text()
-        save_settings(mpv_args, vlc_args, self.settings_location)
+        darkmode_args = self.ui.dark_combo.currentText()
+        save_settings(mpv_args, vlc_args, darkmode_args, self.settings_location)
         self.init_trigger.emit()
         self.close()

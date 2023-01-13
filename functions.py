@@ -33,14 +33,15 @@ def init_settings(settings_location):
                     mpv_args = f.readline().rstrip('\n')
                 if line.startswith('[vlc]'):
                     vlc_args = f.readline().rstrip('\n')
+                if line.startswith('[darkmode]'):
+                    darkmode_args = f.readline().rstrip('\n')
 
-
-        return mpv_args, vlc_args
+        return mpv_args, vlc_args, darkmode_args
 
     except FileNotFoundError:
         try: 
             with open(settings_location, 'w') as f:
-                data = "[mpv]\n\n[vlc]\n\n"
+                data = "[mpv]\n\n[vlc]\n\n[darkmode]\nauto\n"
                 f.write(data)
 
             with open(settings_location, 'r') as f:
@@ -49,14 +50,15 @@ def init_settings(settings_location):
                         mpv_args = f.readline().rstrip('\n')
                     if line.startswith('[vlc]'):
                         vlc_args = f.readline().rstrip('\n')
+                    if line.startswith('[darkmode]'):
+                        darkmode_args = f.readline().rstrip('\n')
 
-
-            return mpv_args, vlc_args
+            return mpv_args, vlc_args, darkmode_args
 
         except FileNotFoundError:
             print("Error")
 
-def save_settings(mpv_args, vlc_args, settings_location):
+def save_settings(mpv_args, vlc_args, darkmode_args, settings_location):
     try: 
         with open(settings_location, 'r') as f:
             data = f.readlines()
@@ -65,6 +67,9 @@ def save_settings(mpv_args, vlc_args, settings_location):
                     data[index+1] = mpv_args + '\n'
                 if line.startswith('[vlc]'):
                     data[index+1] = vlc_args + '\n'
+                if line.startswith('[darkmode]'):
+                    data[index+1] = darkmode_args + '\n'
+
     except FileNotFoundError:
         print("File not found")
 
