@@ -18,7 +18,7 @@ CHANNELS = init_database(CHANNEL_JSON)
 SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
 SETTINGS = init_settings(SETTINGS_LOCATION)
 
-VERSION = "1.0.2"
+VERSION = "1.1.0"
 
 class MainWindow(QMainWindow):
     def __init__(self):
