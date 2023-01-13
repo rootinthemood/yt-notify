@@ -10,6 +10,7 @@ from add_channel_window import addChannelWindow
 from settings_window import settingsWindow
 from systray import SystemTrayIcon
 from pynotifier import Notification
+import qdarktheme
 
 PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
@@ -273,7 +274,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
-
+    qdarktheme.setup_theme(SETTINGS[2])
     systray = SystemTrayIcon(QIcon("images/icon.ico"), window)
     sys_update_all = partial(window.update_all_clicked, "")
     systray.update_signal.connect(sys_update_all)
