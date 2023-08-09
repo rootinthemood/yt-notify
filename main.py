@@ -1,4 +1,4 @@
-import os, sys, json, re, platform
+import os, sys, json, re, platform, subprocess
 from functions import write_json, init_database, check_unseen, check_watching, init_settings
 from scrapevideos import UpdateChannel
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
@@ -9,7 +9,6 @@ from functools import partial
 from add_channel_window import addChannelWindow
 from settings_window import settingsWindow
 from systray import SystemTrayIcon
-from pynotifier import Notification
 import qdarktheme
 
 PLATFORM = platform.system()
@@ -18,7 +17,7 @@ CHANNELS = init_database(CHANNEL_JSON)
 SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
 SETTINGS = init_settings(SETTINGS_LOCATION)
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -255,14 +254,8 @@ class MainWindow(QMainWindow):
 
     def notify_platform(self, text):
         """Pushes notification to os with given text"""
-        icon = os.path.abspath("images/icon.ico")
-        if PLATFORM == "Linux":
-            icon = os.path.abspath("images/icon.png")
-        Notification(title="yt-notify",
-                     description=text,
-                     icon_path=icon,
-                     duration=5,
-                     urgency="normal").send()
+        icon = os.path.abspath("images/icon.png")
+        subprocess.Popen(['notify-send', '-u', 'critical', '-i', icon,'-a', 'yt-notify', text])
 
     def re_init_settings(self):
         global SETTINGS
