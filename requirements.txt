@@ -2,7 +2,6 @@ altgraph
 certifi
 charset-normalizer
 idna
-py-notifier==0.3.2
 pyperclip
 pyqtdarktheme
 PyQt6
