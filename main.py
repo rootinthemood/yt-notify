@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
                 self.chan_button.setStyleSheet('color: red')
                 self.chan_button.setStatusTip(f"Not Seen: {unseen_vids}")
             if unseen_vids > 0 and watching_vids > 0:
-                self.chan_button.setStyleSheet('color: blue')
+                self.chan_button.setStyleSheet('color: blueviolet')
                 self.chan_button.setStatusTip(f"Not Seen: {unseen_vids}, Watching: {watching_vids}")
             if watching_vids > 0 and unseen_vids == 0:
                 self.chan_button.setStyleSheet('color: blue')
