@@ -1,7 +1,6 @@
 import scrapetube
 from PyQt6.QtCore import pyqtSignal, QThread
 from PyQt6.QtWidgets import QMessageBox
-from time import sleep
 
 
 class UpdateChannel(QThread):
@@ -58,9 +57,10 @@ class UpdateChannel(QThread):
                                 count += 1
                                 found='yes'
                             completed_list.append((found, name, count))
-        except:
-            print("An issue with scraping has occured")
-            self.scrape_error.emit("An issue with scraping has occured")
+        except Exception as error:
+            error_txt = "type: {0}, error: {1}".format(type(error).__name__, error)
+            print(error_txt)
+            self.scrape_error.emit(error_txt)
             return
         else:
             self.worker_complete.emit(completed_list, self.channel_list)
@@ -78,4 +78,3 @@ def scrape_channel(channel_name, channel_list):
     videos = scrapetube.get_channel(channel_url=url, limit=1)
     for video in videos:
         video_id = video['videoId']
-
