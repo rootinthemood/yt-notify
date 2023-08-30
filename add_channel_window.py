@@ -58,9 +58,11 @@ class addChannelWindow(QWidget):
         self.channel_list[self.name] = []
         try:
             scrape_channel(self.name, self.channel_list)
-        except:
+        except Exception as error:
+            error_txt = "type: {0}, error: {1}".format(type(error).__name__, error)
+            print(error_txt)
             QMessageBox.warning(self, "Error",
-                                "Channel probably not found",
+                                error_txt,
                                 QMessageBox.StandardButton.Ok)
             for index, channel in enumerate(self.channel_list['channels']):
                 if self.name == channel['name']:
