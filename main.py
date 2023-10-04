@@ -254,8 +254,9 @@ class MainWindow(QMainWindow):
 
     def notify_platform(self, text):
         """Pushes notification to os with given text"""
+        print(text)
         icon = os.path.abspath("images/icon.png")
-        subprocess.Popen(['notify-send', '-u', 'critical', '-i', icon,'-a', 'yt-notify', text])
+        subprocess.Popen(['notify-send', '-u', 'critical', '-i', icon,'-a', 'yt-notify', ' ', text])
 
     def re_init_settings(self):
         global SETTINGS
