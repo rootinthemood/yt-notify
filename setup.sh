@@ -1,18 +1,13 @@
 #!/bin/sh
 PKG_NAME="yt-notify"
-INSTALL_FOLDER="/opt/"
-LINK_FOLDER="/usr/bin/"
-TOTAL_INSTALL=$INSTALL_FOLDER$PKG_NAME
 LOGIN_NAME=$(logname)
+INSTALL_FOLDER="/home/"$LOGIN_NAME"/.local/opt/"
+LINK_FOLDER="/home/"$LOGIN_NAME"/.local/bin/"
+TOTAL_INSTALL=$INSTALL_FOLDER$PKG_NAME
 PYTHON_EXE=$(which python3)
 PYTHON_INSERT_1="#!${PYTHON_EXE}"
 PYTHON_INSERT_2="os.chdir(\"${TOTAL_INSTALL}/\")"
 TEMP_DIR=$(cat /dev/random | strings | grep -m 1 -oEi '[a-zA-Z0-9]{10}')
-
-if [ ! ${EUID} -eq 0 ]; then
-  echo "Please run as sudo"
-  exit
-fi
 
 printf "This script installs '${PKG_NAME}'\n 
 it places the files in ${INSTALL_FOLDER}  
@@ -45,8 +40,8 @@ cd /tmp/$TEMP_DIR
 Test_Exit_Status "temporary directory /tmp/"
 shopt -u extglob
 
-sed -iv "1 i$PYTHON_INSERT_1" ./main.py && \
-sed -iv "14 i$PYTHON_INSERT_2" ./main.py && \
+sed -i "1 i$PYTHON_INSERT_1" ./main.py && \
+sed -i "14 i$PYTHON_INSERT_2" ./main.py && \
 mv -v ./main.py $PKG_NAME
 Test_Exit_Status "sed changing source code"
 
