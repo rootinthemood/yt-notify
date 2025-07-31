@@ -22,11 +22,21 @@ class SystemTrayIcon(QSystemTrayIcon):
         self.quit.triggered.connect(self.exit_all)
         menu.addAction(self.quit)
 
-
         # Add the menu to the tray
         self.setContextMenu(menu)
         self.setVisible(True)
         self.setToolTip("yt-notify")
+
+        # Connect the activated signal to handle left-click
+        self.activated.connect(self.handle_tray_click)
+
+    def handle_tray_click(self, reason):
+        # Check if the tray icon was left-clicked
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            if self.parent().isVisible():
+                self.parent().hide()
+            else:
+                self.show_parent()
 
     def exit_all(self):
         sys.exit()
