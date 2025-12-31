@@ -14,7 +14,7 @@ yt-dlp
 ## Run
 ```bash
 git clone https://github.com/rootinthemood/yt-notify.git
-cd yt-notify
+cd yt-notify/yt-notify
 uv run main.py
 ```
 
