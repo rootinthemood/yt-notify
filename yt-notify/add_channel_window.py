@@ -1,5 +1,4 @@
-import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox
+from PyQt6.QtWidgets import QWidget, QMessageBox
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal
 from PyQt6 import QtWidgets
@@ -40,7 +39,7 @@ class addChannelWindow(QWidget):
         for channel in self.channel_list['channels']:
             if not url_check(self.url):
                 QMessageBox.warning(self, "Error",
-                                    f"<p>Incorrect URL format</p>",
+                                    "<p>Incorrect URL format</p>",
                                     QMessageBox.StandardButton.Ok)
                 return False
             elif self.name == channel['name']:

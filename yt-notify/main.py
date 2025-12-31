@@ -1,7 +1,9 @@
-import os, sys, json, re, platform, subprocess
+import os
+import sys
+import subprocess
 from functions import write_json, init_database, check_unseen, check_watching, init_settings
 from scrapevideos import UpdateChannel
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QGridLayout, QMenu, QMessageBox, QSystemTrayIcon, QStatusBar, QProgressBar
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QGridLayout, QMenu, QMessageBox, QStatusBar, QProgressBar
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from videos_window import VideoWindow
@@ -11,7 +13,6 @@ from settings_window import settingsWindow
 from systray import SystemTrayIcon
 import qdarktheme
 
-PLATFORM = platform.system()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
 CHANNELS = init_database(CHANNEL_JSON)
 SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")

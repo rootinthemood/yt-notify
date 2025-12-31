@@ -1,11 +1,10 @@
 import sys, os
-from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox
+from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal
-from functions import init_database, write_json, url_check, save_settings
+from functions import save_settings
 from ui.settings_window_ui import Ui_Form
-from scrapevideos import scrape_channel
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 import qdarktheme
 
 class settingsWindow(QWidget):

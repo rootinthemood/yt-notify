@@ -1,6 +1,5 @@
 import scrapetube
 from PyQt6.QtCore import pyqtSignal, QThread
-from PyQt6.QtWidgets import QMessageBox
 
 
 class UpdateChannel(QThread):

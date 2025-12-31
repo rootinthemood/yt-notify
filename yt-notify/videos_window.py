@@ -1,7 +1,5 @@
-import sys
-import os
 import platform
-from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu, QLineEdit
+from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu
 from PyQt6.QtGui import QAction, QIcon 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6 import QtCore, QtWidgets
