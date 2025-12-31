@@ -4,25 +4,26 @@ Program that wil help you follow and track youtube channels and its videos witho
 ![yt-notify01_2](https://user-images.githubusercontent.com/105909072/169989558-b5eb0a02-8e46-4d82-ac0e-2ac865cde0a6.png)
 
 ## Requirements
+Install these dependencies first:
 ```bash
-pip install -r requirements.txt
+uv
+mpv
+yt-dlp
 ```
 
 ## Run
 ```bash
 git clone https://github.com/rootinthemood/yt-notify.git
 cd yt-notify
-pip install -r requirements.txt
-python3 ./main.py
+uv run main.py
 ```
 
 ## Install
-If you want to install and be able to directly call 'yt-notify' from terminal.
+If you want to install 'yt-notify'.
 ```bash
 git clone https://github.com/rootinthemood/yt-notify.git
 cd yt-notify
-pip install -r requirements.txt
-sudo ./setup.sh
+./setup.sh
 ```
 
 ## Update

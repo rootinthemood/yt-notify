@@ -1,0 +1,21 @@
+[project]
+name = "yt-notify"
+version = "1.1.3"
+description = "Follow and track youtube channels without account"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "altgraph>=0.17.5",
+    "certifi>=2025.11.12",
+    "charset-normalizer>=3.4.4",
+    "idna>=3.11",
+    "pyperclip>=1.11.0",
+    "pyqt6>=6.10.1",
+    "pyqt6-qt6>=6.10.1",
+    "pyqt6-sip>=13.10.3",
+    "pyqtdarktheme>=2.1.0",
+    "requests>=2.32.5",
+    "scrapetube>=2.5.1",
+    "typing-extensions>=4.15.0",
+    "urllib3>=2.6.2",
+]
