@@ -8,7 +8,7 @@ from scrapevideos import scrape_channel
 
 
 class addChannelWindow(QWidget):
-    #Make signal for closeEvent
+    # Make signal for closeEvent
     close_trigger = pyqtSignal()
 
     def __init__(self, channel_list, json_location):
@@ -29,43 +29,54 @@ class addChannelWindow(QWidget):
         self.setWindowTitle("Add Channel")
         self.setWindowIcon(QIcon("images/icon.ico"))
 
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).clicked.connect(self.add)
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).clicked.connect(self.close)
+        self.ui.buttonBox.button(
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+        ).clicked.connect(self.add)
+        self.ui.buttonBox.button(
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        ).clicked.connect(self.close)
 
     def add(self):
         self.name = self.ui.name_edit.text()
         self.url = self.ui.url_edit.text()
 
-        for channel in self.channel_list['channels']:
+        for channel in self.channel_list["channels"]:
             if not url_check(self.url):
-                QMessageBox.warning(self, "Error",
-                                    "<p>Incorrect URL format</p>",
-                                    QMessageBox.StandardButton.Ok)
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    "<p>Incorrect URL format</p>",
+                    QMessageBox.StandardButton.Ok,
+                )
                 return False
-            elif self.name == channel['name']:
-                QMessageBox.warning(self, "Error",
-                                    f"<p>{self.name} already in database</p>",
-                                    QMessageBox.StandardButton.Ok)
+            elif self.name == channel["name"]:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    f"<p>{self.name} already in database</p>",
+                    QMessageBox.StandardButton.Ok,
+                )
                 return False
-            elif self.url == channel['url']:
-                QMessageBox.warning(self, "Error",
-                                    "URL already in database",
-                                    QMessageBox.StandardButton.Ok)
+            elif self.url == channel["url"]:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    "URL already in database",
+                    QMessageBox.StandardButton.Ok,
+                )
                 return False
 
-        self.channel_list['channels'].append({'name': self.name, 'url': self.url})
+        self.channel_list["channels"].append({"name": self.name, "url": self.url})
         self.channel_list[self.name] = []
         try:
             scrape_channel(self.name, self.channel_list)
         except Exception as error:
             error_txt = "type: {0}, error: {1}".format(type(error).__name__, error)
             print(error_txt)
-            QMessageBox.warning(self, "Error",
-                                error_txt,
-                                QMessageBox.StandardButton.Ok)
-            for index, channel in enumerate(self.channel_list['channels']):
-                if self.name == channel['name']:
-                    self.channel_list['channels'].pop(index)
+            QMessageBox.warning(self, "Error", error_txt, QMessageBox.StandardButton.Ok)
+            for index, channel in enumerate(self.channel_list["channels"]):
+                if self.name == channel["name"]:
+                    self.channel_list["channels"].pop(index)
                     self.channel_list.pop(self.name)
 
         write_json(self.channel_list, self.json_location)
