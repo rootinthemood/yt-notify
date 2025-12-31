@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal
 from functions import init_database, write_json, url_check, save_settings
-from settings_window_ui import Ui_Form
+from ui.settings_window_ui import Ui_Form
 from scrapevideos import scrape_channel
 from PyQt6 import QtCore, QtGui, QtWidgets
 import qdarktheme

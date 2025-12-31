@@ -22,7 +22,7 @@ Type=Application
 Categories=Utility;
 Terminal=false
 Path=$TOTAL_INSTALL
-Exec=uv run main.py
+Exec=uv run ./yt-notify/main.py
 Icon=$TOTAL_INSTALL/images/icon.png" | sudo tee $DESKTOP_LOCATION > /dev/null
 }
 
@@ -59,7 +59,7 @@ cd $TEMP_DIR
 Test_Exit_Status "temporary directory in /tmp/"
 shopt -u extglob
 
-sed -i "14 i$PYTHON_INSERT" ./main.py && \
+sed -i "14 i$PYTHON_INSERT" ./yt-nofify/main.py && \
 Test_Exit_Status "sed changing source code"
 
 mkdir -pv $TOTAL_INSTALL && \

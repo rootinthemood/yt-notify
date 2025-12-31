@@ -6,7 +6,7 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import pyqtSignal
 from PyQt6 import QtCore, QtWidgets
 from functions import write_json
-from video_window_ui import Ui_Form
+from ui.video_window_ui import Ui_Form
 import webbrowser
 import subprocess
 from shutil import which

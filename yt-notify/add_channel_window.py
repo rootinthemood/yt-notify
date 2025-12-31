@@ -4,7 +4,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal
 from PyQt6 import QtWidgets
 from functions import init_database, write_json, url_check
-from add_channel_window_ui import Ui_add_channel
+from ui.add_channel_window_ui import Ui_add_channel
 from scrapevideos import scrape_channel
 
 
