@@ -14,8 +14,8 @@ yt-dlp
 ## Run
 ```bash
 git clone https://github.com/rootinthemood/yt-notify.git
-cd yt-notify/yt-notify
-uv run main.py
+cd yt-notify
+uv run ./yt-notify/main.py
 ```
 
 ## Install

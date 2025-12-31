@@ -4,4 +4,4 @@ venv/
 .venv/
 data/
 Session.vim
-
+./yt-notify/__pycache__/
