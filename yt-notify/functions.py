@@ -27,6 +27,7 @@ def init_database(json_location):
 
 
 def init_settings(settings_location):
+    mpv_args, vlc_args, darkmode_args = None, None, None
     try:
         with open(settings_location, "r") as f:
             for line in f:
@@ -61,6 +62,7 @@ def init_settings(settings_location):
 
 
 def save_settings(mpv_args, vlc_args, darkmode_args, settings_location):
+    data = []
     try:
         with open(settings_location, "r") as f:
             data = f.readlines()

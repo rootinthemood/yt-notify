@@ -57,11 +57,12 @@ class MainWindow(QMainWindow):
     def setup_main_window(self):
         """Sets up the main Qt Window and populates it with a button for each channel"""
         # Make statusbar
-        self.setStatusBar(QStatusBar())
+        status_bar = QStatusBar()
+        self.setStatusBar(status_bar)
 
         # Make progressbar and set it in statusbar
         self.progressBar = QProgressBar()
-        self.statusBar().addPermanentWidget(self.progressBar)
+        status_bar.addPermanentWidget(self.progressBar)
         self.progressBar.setMaximumSize(200, 20)
         self.progressBar.setHidden(True)
         self.progressBar.setValue(0)
@@ -108,7 +109,7 @@ class MainWindow(QMainWindow):
                 self.chan_button.setStyleSheet("color: green")
                 self.chan_button.setStatusTip("Everything seen!")
 
-            # Pust name in list because UpdateChannel wants a list of channel names
+            # Puts name in list because UpdateChannel wants a list of channel names
             name_lst = [name]
 
             # Creation of dropdown menu on channel button
@@ -116,16 +117,19 @@ class MainWindow(QMainWindow):
             self.chan_button.setMenu(menu)
             video_menu = menu.addAction("Videos")
             open_channel = partial(self.open_video_window, name)
+            assert video_menu is not None
             video_menu.triggered.connect(open_channel)
 
             menu.addSeparator()
 
             update_menu = menu.addAction("Update Channel")
             update_channel = partial(self.update_all_clicked, name_lst)
+            assert update_menu is not None
             update_menu.triggered.connect(update_channel)
 
             remove_channel_menu = menu.addAction("Remove Channel")
             delete_channel = partial(self.remove_channel, name)
+            assert remove_channel_menu is not None
             remove_channel_menu.triggered.connect(delete_channel)
 
             # Puts channel buttons on the grid layout
@@ -163,14 +167,18 @@ class MainWindow(QMainWindow):
 
     def create_menu(self):
         """Create the top menu bar"""
-        self.menuBar().setNativeMenuBar(False)
+        menu_bar = self.menuBar()
+        assert menu_bar is not None
+        menu_bar.setNativeMenuBar(False)
 
         file_menu = self.menuBar().addMenu("File")
+        assert file_menu is not None
         file_menu.addAction(self.add_channel_button)
         file_menu.addAction(self.update_channels)
         file_menu.addAction(self.quit_act)
 
         file_menu2 = self.menuBar().addMenu("Help")
+        assert file_menu2 is not None
         file_menu2.addAction(self.settings)
         file_menu2.addAction(self.about)
 
@@ -295,10 +303,17 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    if SETTINGS and isinstance(SETTINGS, (list, tuple)) and len(SETTINGS) > 2:
+        theme = SETTINGS[2] if isinstance(SETTINGS[2], str) else "auto"
+    else:
+        theme = "auto"
+
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
-    qdarktheme.setup_theme(SETTINGS[2])
+    
+    qdarktheme.setup_theme(theme)
+
     systray = SystemTrayIcon(QIcon("images/icon.ico"), window)
     sys_update_all = partial(window.update_all_clicked, "")
     systray.update_signal.connect(sys_update_all)
