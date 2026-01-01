@@ -4,6 +4,8 @@ import subprocess
 from functions import (
     write_json,
     init_database,
+    check_total,
+    check_seen,
     check_unseen,
     check_watching,
     init_settings,
@@ -89,21 +91,23 @@ class MainWindow(QMainWindow):
             self.chan_button = QPushButton(name, self)
 
             # sets text color for buttons
+            total_vids = check_total(name, CHANNELS)
+            seen_vids = check_seen(name, CHANNELS)
             unseen_vids = check_unseen(name, CHANNELS)
             watching_vids = check_watching(name, CHANNELS)
 
             if unseen_vids > 0 and watching_vids == 0:
                 self.chan_button.setStyleSheet("color: red")
-                self.chan_button.setStatusTip(f"Not Seen: {unseen_vids}")
+                self.chan_button.setStatusTip(f"Seen: {seen_vids}/{total_vids}")
             if unseen_vids > 0 and watching_vids > 0:
                 self.chan_button.setStyleSheet("color: blueviolet")
                 self.chan_button.setStatusTip(
-                    f"Not Seen: {unseen_vids}, Watching: {watching_vids}"
+                    f"Seen: {seen_vids}/{total_vids}, Watching: {watching_vids}"
                 )
             if watching_vids > 0 and unseen_vids == 0:
-                self.chan_button.setStyleSheet("color: blue")
+                self.chan_button.setStyleSheet("color: blueviolet")
                 self.chan_button.setStatusTip(
-                    f"Not Seen: {unseen_vids}, Watching: {watching_vids}"
+                    f"Seen: {seen_vids}/{total_vids}, Watching: {watching_vids}"
                 )
             if unseen_vids == 0 and watching_vids == 0:
                 self.chan_button.setStyleSheet("color: green")

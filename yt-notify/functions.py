@@ -92,6 +92,12 @@ def write_json(channel_list, json_location):
     except FileNotFoundError:
         print("json file not found")
 
+def check_total(channel_name, channel_list):
+    """Counts total videos"""
+    count = 0
+    for _ in channel_list[channel_name]:
+        count += 1
+    return count
 
 def check_unseen(channel_name, channel_list):
     """Checks if channel has unseen videos"""
@@ -102,6 +108,14 @@ def check_unseen(channel_name, channel_list):
             continue
     return count
 
+def check_seen(channel_name, channel_list):
+    """Checks if channel has seen videos"""
+    count = 0
+    for channel in channel_list[channel_name]:
+        if channel["seen"]:
+            count += 1
+            continue
+    return count
 
 def check_watching(channel_name, channel_list):
     """Checks if channel has currently watching videos"""
