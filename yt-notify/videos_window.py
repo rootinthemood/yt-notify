@@ -1,5 +1,6 @@
+import os
 import platform
-from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu
+from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu, QMessageBox
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import pyqtSignal
 from PyQt6 import QtCore, QtWidgets
@@ -45,14 +46,14 @@ class VideoWindow(QWidget):
         self.ui.found_total.setHidden(True)
 
         total_vids = 0
-        for index, channel in enumerate(self.channel_list[self.channel_name]):
+        for channel in self.channel_list[self.channel_name]:
             video_id = channel["video_id"]
             title = channel["title"]
             total_vids += 1
             item = QTreeWidgetItem(self.ui.treeWidget, [title])
             item.setToolTip(0, title)
             item.setText(2, video_id)
-            if channel["seen"] == True:
+            if channel["seen"]:
                 item.setCheckState(1, QtCore.Qt.CheckState.Checked)
             elif channel["seen"] == "Watching":
                 item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
@@ -81,6 +82,8 @@ class VideoWindow(QWidget):
     def check_all(self):
         """checks all checkbuttons"""
         root = self.ui.treeWidget.invisibleRootItem()
+        assert root is not None
+
         child_count = root.childCount()
         for i in range(child_count):
             item = root.child(i)
@@ -89,6 +92,8 @@ class VideoWindow(QWidget):
     def uncheck_all(self):
         """uncheck all checkbuttons"""
         root = self.ui.treeWidget.invisibleRootItem()
+        assert root is not None
+
         child_count = root.childCount()
         for i in range(child_count):
             item = root.child(i)
@@ -97,10 +102,11 @@ class VideoWindow(QWidget):
     def save(self):
         """Saves the checkbutton state to json"""
         root = self.ui.treeWidget.invisibleRootItem()
+        assert root is not None
         child_count = root.childCount()
         for i in range(child_count):
             item = root.child(i)
-            title = item.text(0)  # text at first (0) column
+            item.text(0)  # text at first (0) column
             video_id = item.text(2)
             state = item.checkState(1)
             for index, video in enumerate(self.channel_list[self.channel_name]):
@@ -122,6 +128,7 @@ class VideoWindow(QWidget):
             return
 
         item = self.ui.treeWidget.itemAt(point)
+        assert item is not None
         video_id = item.text(2)  # The text of the node.
         yt_link = "https://www.youtube.com/watch?v=" + video_id
 
@@ -129,38 +136,83 @@ class VideoWindow(QWidget):
         menu = QMenu()
         self.open_browser = QAction("&Open in browser")
         self.open_browser.triggered.connect(
-            lambda e, yt_link=yt_link: webbrowser.open_new_tab(yt_link)
+            lambda _, yt_link=yt_link: webbrowser.open_new_tab(yt_link)
             and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
         )
         menu.addAction(self.open_browser)
 
         if which("mpv"):
-            mpv_args = which("mpv") + " " + self.mpv_args + " " + yt_link
+            mpv_args = self.mpv_args + " " + yt_link
             self.play_mpv = QAction("&Play with mpv")
             self.play_mpv.triggered.connect(
-                lambda e, mpv_args=mpv_args: subprocess.Popen([mpv_args], shell=True)
-                and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
+                lambda _, mpv_args=mpv_args: (
+                    self.run_subprocess("mpv", mpv_args, item),  # Run the subprocess
+                    )
             )
             menu.addAction(self.play_mpv)
 
         if which("vlc"):
-            vlc_args = which("vlc") + " " + self.vlc_args + " " + yt_link
-            self.play_vlc = QAction("&Play with VLC")
+            vlc_args = self.vlc_args + " " + yt_link
+            self.play_vlc = QAction("&Play with vlc")
             self.play_vlc.triggered.connect(
-                lambda e, vlc_args=vlc_args: subprocess.Popen([vlc_args], shell=True)
-                and item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)
+                lambda _, vlc_args=vlc_args: (
+                    self.run_subprocess("vlc", vlc_args, item),  # Run the subprocess
+                    )
             )
             menu.addAction(self.play_vlc)
 
+
         self.copy_link = QAction("&Copy link")
-        self.copy_link.triggered.connect(lambda e, yt_link=yt_link: pc.copy(yt_link))
+        self.copy_link.triggered.connect(lambda _, yt_link=yt_link: pc.copy(yt_link))
         menu.addAction(self.copy_link)
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
 
+    
+    def run_subprocess(self, program, args, item):
+        program_location = which(program)
+        if program_location is None:
+            self.show_error("Program not found", "The specified program could not be found.")
+            return
+
+        total = program_location + " " + args
+
+        try:
+            # Run the program and capture both stdout and stderr
+            subprocess.run(
+                total,
+                preexec_fn=os.setpgrp,
+                close_fds=True,
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)  # Then set the check state
+
+        except subprocess.CalledProcessError as e:
+            # If the process fails, check stdout for error output
+            error_message = e.stdout.decode() if e.stdout else "Unknown error"
+            print(error_message)
+            self.show_error("Error", error_message)
+
+        except Exception as e:
+            # Catch any other unexpected errors
+            error_message = "Unexpected Error", f"An unexpected error occurred: {str(e)}"
+            print(error_message)
+            self.show_error("Error", error_message)
+
+    def show_error(self, title, message):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Critical)
+        msg.setText(message)
+        msg.setWindowTitle(title)
+        msg.exec()
+
     def search(self):
         search_text = self.ui.le_search.text()
         root = self.ui.treeWidget.invisibleRootItem()
+        assert root is not None
         child_count = root.childCount()
         found_total = 0
         self.ui.label_found.setVisible(True)
@@ -178,6 +230,7 @@ class VideoWindow(QWidget):
 
         for i in range(child_count):
             item = root.child(i)
+            assert item is not None
             title = item.text(0)  # text at first (0) column
             item.text(2)
             item.checkState(1)
