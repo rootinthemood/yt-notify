@@ -1,13 +1,11 @@
-import os
 import platform
 from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QMenu, QMessageBox
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import QProcess, pyqtSignal, Qt
 from PyQt6 import QtCore, QtWidgets
 from functions import write_json
 from ui.video_window_ui import Ui_Form
 import webbrowser
-import subprocess
 from shutil import which
 import pyperclip as pc
 
@@ -168,39 +166,47 @@ class VideoWindow(QWidget):
 
         menu.exec(self.ui.treeWidget.mapToGlobal(point))
 
-    
+
     def run_subprocess(self, program, args, item):
         program_location = which(program)
         if program_location is None:
             self.show_error("Program not found", "The specified program could not be found.")
             return
 
-        total = program_location + " " + args
-
         try:
-            # Run the program and capture both stdout and stderr
-            subprocess.run(
-                total,
-                preexec_fn=os.setpgrp,
-                close_fds=True,
-                shell=True,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            item.setCheckState(1, QtCore.Qt.CheckState.PartiallyChecked)  # Then set the check state
+            process = QProcess(self)
 
-        except subprocess.CalledProcessError as e:
-            # If the process fails, check stdout for error output
-            error_message = e.stdout.decode() if e.stdout else "Unknown error"
-            print(error_message)
-            self.show_error("Error", error_message)
+            def handle_finished():
+                if process.exitStatus() == QProcess.ExitStatus.NormalExit and process.exitCode() == 0:
+                    item.setCheckState(1, Qt.CheckState.PartiallyChecked)
+                else:
+                    stdout = process.readAllStandardOutput().data().decode().strip()
+                    stderr = process.readAllStandardError().data().decode().strip()
+
+                    if stderr:
+                        print("Error:", stderr)
+                        self.show_error("Error", stderr)
+                    elif stdout:
+                        print("Standard Output:", stdout)
+                        self.show_error("Error", stdout)
+                    else:
+                        self.show_error("Error", "Unknown error. No output captured.")
+
+            # Connect the finished signal to the handle_finished function
+            process.finished.connect(handle_finished)
+
+            # Start the process with the specified program and arguments
+            process.start(program_location, args.split())
+
+            # Check if the process started successfully
+            if not process.waitForStarted():
+                raise Exception("Failed to start the process")
 
         except Exception as e:
-            # Catch any other unexpected errors
-            error_message = "Unexpected Error", f"An unexpected error occurred: {str(e)}"
+            error_message = f"Unexpected Error: {str(e)}"
             print(error_message)
             self.show_error("Error", error_message)
+
 
     def show_error(self, title, message):
         msg = QMessageBox()
