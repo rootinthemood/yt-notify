@@ -65,9 +65,6 @@ Test_Exit_Status "copying icons"
 
 cd $TEMP_DIR
 
-sed -i "15 i$PYTHON_INSERT" ./yt-nofify/main.py
-Test_Exit_Status "sed changing source code"
-
 mkdir -pv $TOTAL_INSTALL && \
 cp -rv ./* $TOTAL_INSTALL && \
 Test_Exit_Status "installing to: ${TOTAL_INSTALL}"

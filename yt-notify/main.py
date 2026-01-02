@@ -1,4 +1,3 @@
-import os
 import sys
 import subprocess
 from functions import (
@@ -306,7 +305,6 @@ class MainWindow(QMainWindow):
     def re_init_settings(self):
         global SETTINGS
         global SETTINGS_LOCATION
-        SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
         SETTINGS = init_settings(SETTINGS_LOCATION)
 
 
