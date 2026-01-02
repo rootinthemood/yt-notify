@@ -35,8 +35,8 @@ import qdarktheme
 
 ICO_ICON = Path("~/.local/share/icons/yt-notify.ico").expanduser()
 PNG_ICON = Path("~/.local/share/icons/yt-notify.png").expanduser()
-CHANNEL_JSON = os.path.abspath("./data/data.json")
-SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
+CHANNEL_JSON = Path("~/.local/share/yt-notify/data.json").expanduser()
+SETTINGS_LOCATION = Path("~/.config/yt-notify/settings.ini").expanduser()
 
 CHANNELS = init_database(CHANNEL_JSON)
 SETTINGS = init_settings(SETTINGS_LOCATION)
