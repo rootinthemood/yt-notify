@@ -11,10 +11,11 @@ class addChannelWindow(QWidget):
     # Make signal for closeEvent
     close_trigger = pyqtSignal()
 
-    def __init__(self, channel_list, json_location):
+    def __init__(self, channel_list, json_location, icon):
         super().__init__()
         self.channel_list = channel_list
         self.json_location = json_location
+        self.icon = icon
         self.initialize_ui()
 
     def close_event(self, event):
@@ -27,7 +28,7 @@ class addChannelWindow(QWidget):
         self.ui = Ui_add_channel()
         self.ui.setupUi(self)
         self.setWindowTitle("Add Channel")
-        self.setWindowIcon(QIcon("images/icon.ico"))
+        self.setWindowIcon(QIcon(str(self.icon)))
 
         self.ui.buttonBox.button(
             QtWidgets.QDialogButtonBox.StandardButton.Ok

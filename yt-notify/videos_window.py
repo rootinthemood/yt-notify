@@ -13,11 +13,12 @@ import pyperclip as pc
 class VideoWindow(QWidget):
     close_trigger = pyqtSignal()
 
-    def __init__(self, channel_list, channel_name, json_location, settings):
+    def __init__(self, channel_list, channel_name, json_location, settings, icon):
         super().__init__()
         self.channel_list = channel_list
         self.channel_name = channel_name
         self.json_location = json_location
+        self.icon = icon
         self.initialize_ui()
         self.platform = platform.system()
         self.mpv_args = settings[0]
@@ -27,7 +28,7 @@ class VideoWindow(QWidget):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.setWindowTitle(self.channel_name)
-        self.setWindowIcon(QIcon("images/icon.ico"))
+        self.setWindowIcon(QIcon(str(self.icon)))
         self.ui.label_title.setText(self.channel_name)
 
         # Connect contextmenu to treewidget

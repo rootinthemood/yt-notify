@@ -5,6 +5,7 @@ TOTAL_INSTALL=$INSTALL_FOLDER$PKG_NAME
 PYTHON_INSERT="os.chdir(\"${TOTAL_INSTALL}/\")"
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'TEMP_DIR')
 DESKTOP_LOCATION="/usr/share/applications/${PKG_NAME}.desktop"
+ICON_FOLDER=$HOME"/.local/share/icons/"
 
 Check_Installed () {
   if ! command -v $1 >/dev/null 2>&1
@@ -23,7 +24,7 @@ Categories=Utility;
 Terminal=false
 Path=$TOTAL_INSTALL
 Exec=uv run ./yt-notify/main.py
-Icon=$TOTAL_INSTALL/images/icon.png" | sudo tee $DESKTOP_LOCATION > /dev/null
+Icon=$ICON_FOLDER/yt-notify.png" | sudo tee $DESKTOP_LOCATION > /dev/null
 }
 
 Check_Installed uv
@@ -54,10 +55,15 @@ Test_Exit_Status () {
 }
 
 shopt -s extglob
-cp -rv !(setup.sh) $TEMP_DIR && \
-cd $TEMP_DIR
+cp -rv !(setup.sh|images) $TEMP_DIR && \
 Test_Exit_Status "temporary directory in /tmp/"
 shopt -u extglob
+
+mkdir -pv $ICON_FOLDER && \
+cp -v ./images/* $ICON_FOLDER
+Test_Exit_Status "copying icons"
+
+cd $TEMP_DIR
 
 sed -i "15 i$PYTHON_INSERT" ./yt-nofify/main.py
 Test_Exit_Status "sed changing source code"

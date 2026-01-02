@@ -30,11 +30,15 @@ from functools import partial
 from add_channel_window import addChannelWindow
 from settings_window import settingsWindow
 from systray import SystemTrayIcon
+from pathlib import Path
 import qdarktheme
 
+ICO_ICON = Path("~/.local/share/icons/yt-notify.ico").expanduser()
+PNG_ICON = Path("~/.local/share/icons/yt-notify.png").expanduser()
 CHANNEL_JSON = os.path.abspath("./data/data.json")
-CHANNELS = init_database(CHANNEL_JSON)
 SETTINGS_LOCATION = os.path.abspath("./data/settings.ini")
+
+CHANNELS = init_database(CHANNEL_JSON)
 SETTINGS = init_settings(SETTINGS_LOCATION)
 
 VERSION = "1.1.3"
@@ -48,7 +52,7 @@ class MainWindow(QMainWindow):
     def initialize_ui(self):
         self.setMinimumSize(300, 172)
         self.setWindowTitle("yt-notify")
-        self.setWindowIcon(QIcon(os.path.abspath("images/icon.ico")))
+        self.setWindowIcon(QIcon(str(ICO_ICON)))
 
         self.setup_main_window()
         self.create_actions()
@@ -187,19 +191,19 @@ class MainWindow(QMainWindow):
         file_menu2.addAction(self.about)
 
     def open_settings_window(self):
-        self.new_settings_window = settingsWindow(SETTINGS, SETTINGS_LOCATION)
+        self.new_settings_window = settingsWindow(SETTINGS, SETTINGS_LOCATION, ICO_ICON)
         self.new_settings_window.show()
         self.new_settings_window.init_trigger.connect(self.re_init_settings)
 
     def open_video_window(self, name):
         """Opens the VideoWindow for a given channel name"""
-        self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON, SETTINGS)
+        self.new_video_window = VideoWindow(CHANNELS, name, CHANNEL_JSON, SETTINGS, ICO_ICON)
         self.new_video_window.show()
         self.new_video_window.close_trigger.connect(self.handle_close_trigger)
 
     def add_channel(self):
         """Opens the addChannelWindow"""
-        self.add_channel_window = addChannelWindow(CHANNELS, CHANNEL_JSON)
+        self.add_channel_window = addChannelWindow(CHANNELS, CHANNEL_JSON, ICO_ICON)
         self.add_channel_window.show()
         # connect the trigger to the signal of addChannelWindow
         self.add_channel_window.close_trigger.connect(self.handle_close_trigger)
@@ -294,7 +298,7 @@ class MainWindow(QMainWindow):
     def notify_platform(self, text):
         """Pushes notification to os with given text"""
         print(text)
-        icon = os.path.abspath("images/icon.png")
+        icon = PNG_ICON
         subprocess.Popen(
             ["notify-send", "-u", "critical", "-i", icon, "-a", "yt-notify", " ", text]
         )
@@ -318,7 +322,7 @@ if __name__ == "__main__":
     
     qdarktheme.setup_theme(theme)
 
-    systray = SystemTrayIcon(QIcon("images/icon.ico"), window)
+    systray = SystemTrayIcon(QIcon(str(ICO_ICON)), window)
     sys_update_all = partial(window.update_all_clicked, "")
     systray.update_signal.connect(sys_update_all)
     systray.show()

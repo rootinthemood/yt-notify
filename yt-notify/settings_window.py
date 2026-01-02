@@ -10,19 +10,20 @@ import qdarktheme
 class settingsWindow(QWidget):
     init_trigger = pyqtSignal()
 
-    def __init__(self, settings, settings_location):
+    def __init__(self, settings, settings_location, icon):
         super().__init__()
         self.mpv_args = settings[0]
         self.vlc_args = settings[1]
         self.darkmode_args = settings[2]
         self.settings_location = settings_location
+        self.icon = icon
         self.initialize_ui()
 
     def initialize_ui(self):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.setWindowTitle("settings")
-        self.setWindowIcon(QIcon("images/icon.ico"))
+        self.setWindowIcon(QIcon(str(self.icon)))
         self.ui.mpv_args.setPlaceholderText(
             '--ytdl-format="bestvideo[height<=1080]+bestaudio/best"'
         )
