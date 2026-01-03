@@ -2,9 +2,9 @@
 PKG_NAME="yt-notify"
 INSTALL_FOLDER=$HOME"/.local/opt/"
 TOTAL_INSTALL=$INSTALL_FOLDER$PKG_NAME
-PYTHON_INSERT="os.chdir(\"${TOTAL_INSTALL}/\")"
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'TEMP_DIR')
-DESKTOP_LOCATION="/usr/share/applications/${PKG_NAME}.desktop"
+DESKTOP_FOLDER=$HOME"/.local/share/applications/"
+DESKTOP_FILE="${DESKTOP_FOLDER}${PKG_NAME}.desktop"
 ICON_FOLDER=$HOME"/.local/share/icons/"
 
 Check_Installed () {
@@ -16,7 +16,8 @@ Check_Installed () {
 }
 
 Create_Desktop_File () {
-echo "[Desktop Entry]
+  cat > "$DESKTOP_FILE" <<EOF
+[Desktop Entry]
 Name=yt-notify
 Comment=Follow and track youtube channels without account
 Type=Application
@@ -24,15 +25,27 @@ Categories=Utility;
 Terminal=false
 Path=$TOTAL_INSTALL
 Exec=uv run ./yt-notify/main.py
-Icon=$ICON_FOLDER/yt-notify.png" | sudo tee $DESKTOP_LOCATION > /dev/null
+Icon=${ICON_FOLDER}yt-notify.png
+EOF
+}
+
+Test_Exit_Status () {
+    if [ $? -eq 1 ]
+    then
+        rm -r $TEMP_DIR
+        printf "\nError installing! Problem with: $1\n"
+        exit
+    fi
 }
 
 Check_Installed uv
 Check_Installed mpv
 Check_Installed yt-dlp
 
-printf "This script installs '${PKG_NAME}'\n
-it places the files in ${INSTALL_FOLDER}\n
+printf "\nThis script installs '${PKG_NAME}'
+it places the files in ${INSTALL_FOLDER}
+places the .desktop file in ${DESKTOP_FILE}
+places the icons in ${ICON_FOLDER}\n
 Continue?(y/n): "
 
 while read answer
@@ -44,15 +57,6 @@ do
                       ;;
    esac
 done
-
-Test_Exit_Status () {
-    if [ $? -eq 1 ]
-    then
-        rm -r $TEMP_DIR
-        printf "\nError installing! Problem with: $1\n"
-        exit
-    fi
-}
 
 shopt -s extglob
 cp -rv !(setup.sh|images) $TEMP_DIR && \
@@ -76,7 +80,9 @@ cd $TOTAL_INSTALL && \
 uv sync
 Test_Exit_Status "uv syncing dependencies"
 
+mkdir -pv $DESKTOP_FOLDER
 Create_Desktop_File
+chmod +x $DESKTOP_FILE
 printf "\nCreated .desktop file..."
 Test_Exit_Status "creating .desktop file"
 

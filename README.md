@@ -23,11 +23,8 @@ If you want to install 'yt-notify'.
 ```bash
 git clone https://github.com/rootinthemood/yt-notify.git
 cd yt-notify
-./setup.sh
+./install.sh
 ```
-
-## Update
-Update to a new version? Remove settings.ini in install folder and follow Install again. All your videos will be saved.
 
 Tested on Linux
 
