@@ -32,7 +32,7 @@ class UpdateChannel(QThread):
                             )
                             for video in videos:
                                 video_id = video["videoId"]
-                                title = video["title"]["runs"][0]["text"]
+                                title = video["title"]
                                 temp_videos.append(
                                     {
                                         "video_id": video_id,
