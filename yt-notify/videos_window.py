@@ -37,6 +37,9 @@ class VideoWindow(QWidget):
         )
         self.ui.treeWidget.customContextMenuRequested.connect(self.menu_context_tree)
 
+        # Double-clicking a video title opens it in mpv (same as right-click -> Play with mpv)
+        self.ui.treeWidget.itemDoubleClicked.connect(self.on_item_clicked)
+
         self.ui.treeWidget.setSelectionMode(
             QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
         )
@@ -119,6 +122,23 @@ class VideoWindow(QWidget):
         write_json(self.channel_list, self.json_location)
         self.close_trigger.emit()
 
+    def on_item_clicked(self, item, column):
+        """Double-clicking a video title (column 0) plays it in mpv."""
+        if column != 0:
+            return
+        self.play_with_mpv(item)
+
+    def play_with_mpv(self, item):
+        """Play the given tree item's video in mpv, same as the context menu action."""
+        if not which("mpv"):
+            self.show_error("mpv not found", "mpv could not be found on this system.")
+            return
+
+        video_id = item.text(2)
+        yt_link = "https://www.youtube.com/watch?v=" + video_id
+        mpv_args = self.mpv_args + " " + yt_link
+        self.run_subprocess("mpv", mpv_args, item)
+
     def menu_context_tree(self, point):
         """Make a contextmenu per item in treewidget"""
         index = self.ui.treeWidget.indexAt(point)
@@ -141,12 +161,9 @@ class VideoWindow(QWidget):
         menu.addAction(self.open_browser)
 
         if which("mpv"):
-            mpv_args = self.mpv_args + " " + yt_link
             self.play_mpv = QAction("&Play with mpv")
             self.play_mpv.triggered.connect(
-                lambda _, mpv_args=mpv_args: (
-                    self.run_subprocess("mpv", mpv_args, item),  # Run the subprocess
-                    )
+                lambda _, item=item: self.play_with_mpv(item)
             )
             menu.addAction(self.play_mpv)
 
